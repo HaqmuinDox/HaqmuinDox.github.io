@@ -316,7 +316,7 @@
             // 3. Set a timeout (e.g., 1500ms = 1.5 seconds)
             // If the server doesn't answer in 1.5s, we assume you aren't on VPN.
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1500);
+            const timeoutId = setTimeout(() => controller.abort(), 1000*15);
 
             // 4. Try to touch the server
             // mode: 'no-cors' allows us to 'knock' on the door even if we can't read the response
