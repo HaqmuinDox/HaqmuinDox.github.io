@@ -155,4 +155,68 @@
         <h2>Selected Projects</h2>
         <div class="projects-grid">
             <div class="project-card">
-                <span class="project
+                <span class="project-title">Home Server Dashboard</span>
+                <p>A personal dashboard for managing local docker containers, utilizing Cloudflare Tunnels for secure external access.</p>
+                <a href="#" class="project-link">View Code &rarr;</a>
+            </div>
+
+            <div class="project-card">
+                <span class="project-title">Spotify "Präs und Wörship" Automation</span>
+                <p>Script that analyzes playlist metrics and automates song recommendations based on listening history.</p>
+                <a href="#" class="project-link">View Code &rarr;</a>
+            </div>
+
+            <div class="project-card">
+                <span class="project-title">Portfolio Site</span>
+                <p>You are looking at it. A barebones, performant HTML/CSS site hosted on GitHub Pages with custom DNS.</p>
+                <a href="https://github.com/HaqmuinDox" class="project-link">View Code &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Get in Touch</h2>
+        <p>
+            Interested in collaboration or just want to chat about tech?
+            <br>
+            <a href="mailto:your.email@example.com" style="color: var(--accent-color);">your.email@example.com</a>
+        </p>
+    </section>
+
+    <footer>
+        &copy; 2025 Dan Cardoz. Built with Vanilla HTML/CSS.
+    </footer>
+
+    <script>
+        // JAVASCRIPT: Handles the Dark Mode Toggle and remembers preference
+        const toggleBtn = document.getElementById('theme-btn');
+        const htmlElement = document.documentElement;
+
+        // Check for saved user preference, if any, on load of the website
+        const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+        if (currentTheme) {
+            htmlElement.setAttribute('data-theme', currentTheme);
+            updateButtonText(currentTheme);
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            let theme = htmlElement.getAttribute('data-theme');
+            
+            if (theme === 'dark') {
+                htmlElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                updateButtonText('light');
+            } else {
+                htmlElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                updateButtonText('dark');
+            }
+        });
+
+        function updateButtonText(theme) {
+            toggleBtn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+    </script>
+</body>
+</html>
