@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dan Cardoz | Software Engineer</title>
+    <style>
+        /* CSS VARIABLES: Easy to maintain and theme */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --accent-color: #0066cc;
+            --card-bg: #f4f4f4;
+            --code-font: 'Courier New', Courier, monospace;
+            --body-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        /* DARK MODE VARIABLES */
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --accent-color: #66b3ff;
+            --card-bg: #2d2d2d;
+        }
+
+        /* RESET & BASE STYLES */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--body-font);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 0;
+            border-bottom: 2px solid var(--card-bg);
+            margin-bottom: 40px;
+        }
+
+        h1 { font-family: var(--code-font); font-size: 1.8rem; }
+        .role { color: var(--accent-color); font-weight: bold; font-family: var(--code-font); }
+
+        /* TOGGLE BUTTON */
+        .theme-toggle {
+            cursor: pointer;
+            background: none;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            font-family: var(--code-font);
+            border-radius: 4px;
+        }
+
+        /* SECTIONS */
+        section { margin-bottom: 60px; }
+        h2 { 
+            font-size: 1.5rem; 
+            margin-bottom: 20px; 
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* SKILLS GRID */
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style: none;
+        }
+        .skill-tag {
+            background-color: var(--card-bg);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-family: var(--code-font);
+        }
+
+        /* PROJECTS GRID */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .project-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .project-card:hover { transform: translateY(-5px); }
+        .project-title { font-weight: bold; margin-bottom: 10px; display: block; }
+        .project-link { 
+            color: var(--accent-color); 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 80px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Dan Cardoz</h1>
+            <span class="role">&lt;Software Engineer /&gt;</span>
+        </div>
+        <button class="theme-toggle" id="theme-btn">Light Mode</button>
+    </header>
+
+    <section id="about">
+        <h2>About Me</h2>
+        <p>
+            I am a software developer with a passion for building clean, efficient backend systems and scalable web applications. 
+            Currently focusing on home-lab server management and cloud infrastructure. 
+            I believe in open-source and minimalist code.
+        </p>
+    </section>
+
+    <section id="skills">
+        <h2>Tech Stack</h2>
+        <ul class="skills-list">
+            <li class="skill-tag">Python</li>
+            <li class="skill-tag">JavaScript (ES6+)</li>
+            <li class="skill-tag">Docker</li>
+            <li class="skill-tag">Linux / Bash</li>
+            <li class="skill-tag">Git</li>
+            <li class="skill-tag">SQL</li>
+            <li class="skill-tag">AWS</li>
+        </ul>
+    </section>
+
+    <section id="projects">
+        <h2>Selected Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <span class="project
