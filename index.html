@@ -51,7 +51,7 @@
         h1 { font-family: var(--code-font); font-size: 1.8rem; }
         .role { color: var(--accent-color); font-weight: bold; font-family: var(--code-font); }
 
-        /* TOGGLE BUTTON */
+        /* TOGGLE BUTTON & LINKS */
         .theme-toggle {
             cursor: pointer;
             background: none;
@@ -60,6 +60,16 @@
             padding: 5px 10px;
             font-family: var(--code-font);
             border-radius: 4px;
+            
+            /* Added these two lines so the Link looks exactly like the Button */
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        /* Optional: Hover effect for both */
+        .theme-toggle:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
         }
 
         /* SECTIONS */
@@ -122,17 +132,17 @@
 <body>
 
     <header>
-        <div>
-            <h1>Dan Cardoz</h1>
-            <span class="role">&lt;Software Engineer /&gt;</span>
-        </div>
+    <div>
+        <h1>Dan Cardoz</h1>
+        <span class="role">&lt;Software Engineer /&gt;</span>
+    </div>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/" target="_blank" class="theme-toggle">☁️ Private cloud</a>
         
-        <div style="display: flex; gap: 10px;">
-            <a href="https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/" target="_blank" class="nav-btn">☁️ Private Cloud</a>
-            
-            <button class="nav-btn" id="theme-btn">Light Mode</button>
-        </div>
-    </header>
+        <button class="theme-toggle" id="theme-btn">Light Mode</button>
+    </div>
+</header>
 
     <section id="about">
         <h2>About Me</h2>
