@@ -187,7 +187,7 @@
         </div>
         
         <div class="button-group">
-            <a href="https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/" target="_blank" class="theme-toggle">☁️ Private cloud</a>
+            <a href="#" onclick="handleCloudClick(event)" class="theme-toggle">☁️ Private cloud</a>
             
             <button class="theme-toggle" id="theme-btn">Light Mode</button>
         </div>
@@ -299,6 +299,41 @@
         function updateButtonText(theme) {
             toggleBtn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
         }
+		
+		async function handleCloudClick(event) {
+        event.preventDefault(); // Stop the link from doing anything default
+
+        // 1. Define your URLs
+        const realUrl = "https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/";
+        const fakeUrl = "/secure-cloud"; // This triggers your 404.html
+
+        // 2. Open a new tab immediately (prevents popup blockers)
+        // We set it to a temporary 'loading' state
+        const newWindow = window.open("", "_blank");
+        newWindow.document.write("<html><body style='background:#111; color:#fff; font-family:monospace; display:flex; justify-content:center; align-items:center; height:100vh;'>Probe sending...</body></html>");
+
+        try {
+            // 3. Set a timeout (e.g., 1500ms = 1.5 seconds)
+            // If the server doesn't answer in 1.5s, we assume you aren't on VPN.
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1500);
+
+            // 4. Try to touch the server
+            // mode: 'no-cors' allows us to 'knock' on the door even if we can't read the response
+            await fetch(realUrl, { 
+                mode: 'no-cors', 
+                signal: controller.signal 
+            });
+
+            // 5. SUCCESS: Server exists! Go to the real URL.
+            clearTimeout(timeoutId);
+            newWindow.location.href = realUrl;
+
+        } catch (error) {
+            // 6. FAILURE: Server unreachable or timed out. Go to 404.
+            newWindow.location.href = fakeUrl;
+        }
+    }
     </script>
 </body>
 </html>
