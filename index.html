@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dan Cardoz | Software Engineer</title>
     <style>
-        /* CSS VARIABLES: Easy to maintain and theme */
+        /* CSS VARIABLES */
         :root {
             --bg-color: #ffffff;
             --text-color: #333333;
@@ -24,7 +24,6 @@
             --card-bg: #2d2d2d;
         }
 
-        /* RESET & BASE STYLES */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
@@ -33,7 +32,9 @@
             font-family: var(--body-font);
             line-height: 1.6;
             transition: background-color var(--transition-speed), color var(--transition-speed);
-            max-width: 800px;
+            
+            /* RESPONSIVE CHANGE: Increased width for big monitors */
+            max-width: 1100px; 
             margin: 0 auto;
             padding: 20px;
         }
@@ -48,8 +49,15 @@
             margin-bottom: 40px;
         }
 
-        h1 { font-family: var(--code-font); font-size: 1.8rem; }
+        .header-content h1 { font-family: var(--code-font); font-size: 1.8rem; }
         .role { color: var(--accent-color); font-weight: bold; font-family: var(--code-font); }
+
+        /* BUTTON CONTAINER */
+        .button-group {
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+        }
 
         /* TOGGLE BUTTON & LINKS */
         .theme-toggle {
@@ -57,16 +65,20 @@
             background: none;
             border: 2px solid var(--text-color);
             color: var(--text-color);
-            padding: 5px 10px;
+            width: 160px;
+            height: 40px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 10px;
             font-family: var(--code-font);
             border-radius: 4px;
-            
-            /* Added these two lines so the Link looks exactly like the Button */
             text-decoration: none;
-            display: inline-block;
+            font-size: 0.8rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
         }
         
-        /* Optional: Hover effect for both */
         .theme-toggle:hover {
             background-color: var(--text-color);
             color: var(--bg-color);
@@ -99,7 +111,8 @@
         /* PROJECTS GRID */
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            /* RESPONSIVE CHANGE: This auto-fits. On big screens = 3 columns. Phone = 1 column. */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         .project-card {
@@ -107,6 +120,9 @@
             padding: 20px;
             border-radius: 8px;
             transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .project-card:hover { transform: translateY(-5px); }
         .project-title { font-weight: bold; margin-bottom: 10px; display: block; }
@@ -116,7 +132,7 @@
             font-weight: bold; 
             font-size: 0.9rem;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         /* FOOTER */
@@ -127,22 +143,55 @@
             margin-top: 80px;
             padding-bottom: 20px;
         }
+
+        /* =========================================
+           MOBILE OPTIMIZATIONS (Media Query)
+           Triggers when screen is smaller than 768px (Tablets & Phones)
+           ========================================= */
+        @media (max-width: 768px) {
+            
+            /* Stack Header Vertically */
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                padding: 30px 0;
+            }
+
+            /* Stack Buttons Vertically for easier thumb tapping */
+            .button-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            /* Make buttons full width on phone */
+            .theme-toggle {
+                width: 100%; 
+            }
+
+            /* Reduce font sizes slightly */
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.3rem; }
+            
+            /* Tweak padding */
+            body { padding: 15px; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-    <div>
-        <h1>Dan Cardoz</h1>
-        <span class="role">&lt;Software Engineer /&gt;</span>
-    </div>
-    
-    <div style="display: flex; gap: 10px; align-items: center;">
-        <a href="https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/" target="_blank" class="theme-toggle">☁️ Private cloud</a>
+        <div class="header-content">
+            <h1>Dan Cardoz</h1>
+            <span class="role">&lt;Software Engineer /&gt;</span>
+        </div>
         
-        <button class="theme-toggle" id="theme-btn">Light Mode</button>
-    </div>
-</header>
+        <div class="button-group">
+            <a href="https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/" target="_blank" class="theme-toggle">☁️ Private cloud</a>
+            
+            <button class="theme-toggle" id="theme-btn">Light Mode</button>
+        </div>
+    </header>
 
     <section id="about">
         <h2>About Me</h2>
@@ -157,35 +206,54 @@
         <h2>Tech Stack</h2>
         <ul class="skills-list">
             <li class="skill-tag">Python</li>
-            <li class="skill-tag">JavaScript (ES6+)</li>
-            <li class="skill-tag">Docker</li>
-            <li class="skill-tag">Linux / Bash</li>
-            <li class="skill-tag">Git</li>
+            <li class="skill-tag">Java</li>
+            <li class="skill-tag">C++</li>
             <li class="skill-tag">SQL</li>
-            <li class="skill-tag">AWS</li>
+            <li class="skill-tag">JavaScript</li>
+            <li class="skill-tag">LaTeX</li>
+            <li class="skill-tag">Docker</li>
+            <li class="skill-tag">Git</li>
+            <li class="skill-tag">Linux / Bash</li>
+            <li class="skill-tag">Power Automate</li>
         </ul>
     </section>
 
     <section id="projects">
         <h2>Selected Projects</h2>
         <div class="projects-grid">
+            
             <div class="project-card">
-                <span class="project-title">Home Server Dashboard</span>
-                <p>A personal dashboard for managing local docker containers, utilizing Cloudflare Tunnels for secure external access.</p>
+                <div>
+                    <span class="project-title">HPC Performance Analysis</span>
+                    <p>Hybrid performance analysis for parallel apps using TAU and Linux perf. Developed Python scripts to visualize runtime bottlenecks.</p>
+                </div>
                 <a href="#" class="project-link">View Code &rarr;</a>
             </div>
 
             <div class="project-card">
-                <span class="project-title">Spotify "Präs und Wörship" Automation</span>
-                <p>Script that analyzes playlist metrics and automates song recommendations based on listening history.</p>
+                <div>
+                    <span class="project-title">Recycle Heroes (Android)</span>
+                    <p>Native Android app integrating Mapbox SDK to locate recycling stations. Implemented custom socket networking and JSON parsing.</p>
+                </div>
                 <a href="#" class="project-link">View Code &rarr;</a>
             </div>
 
             <div class="project-card">
-                <span class="project-title">Portfolio Site</span>
-                <p>You are looking at it. A barebones, performant HTML/CSS site hosted on GitHub Pages with custom DNS.</p>
+                <div>
+                    <span class="project-title">Private Cloud Infrastructure</span>
+                    <p>Orchestrated a 24/7 Ubuntu hub managing 8 Docker containers (Nextcloud, Vaultwarden, n8n) secured exclusively via Tailscale VPN.</p>
+                </div>
+                <a href="#" class="project-link">View Code &rarr;</a>
+            </div>
+
+            <div class="project-card">
+                <div>
+                    <span class="project-title">Portfolio Site</span>
+                    <p>You are looking at it. A barebones, performant HTML/CSS site hosted on GitHub Pages with custom DNS.</p>
+                </div>
                 <a href="https://github.com/HaqmuinDox" class="project-link">View Code &rarr;</a>
             </div>
+
         </div>
     </section>
 
@@ -194,7 +262,7 @@
         <p>
             Interested in collaboration or just want to chat about tech?
             <br>
-            <a href="mailto:your.email@example.com" style="color: var(--accent-color);">your.email@example.com</a>
+            <a href="mailto:cardozd83@gmail.com" style="color: var(--accent-color);">cardozd83@gmail.com</a>
         </p>
     </section>
 
@@ -203,12 +271,11 @@
     </footer>
 
     <script>
-        // JAVASCRIPT: Handles the Dark Mode Toggle and remembers preference
+        // JAVASCRIPT
         const toggleBtn = document.getElementById('theme-btn');
         const htmlElement = document.documentElement;
 
-        // Check for saved user preference, if any, on load of the website
-        const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+        const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : 'dark';
 
         if (currentTheme) {
             htmlElement.setAttribute('data-theme', currentTheme);
