@@ -1,339 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dan Cardoz</title>
-    <style>
-        /* CSS VARIABLES */
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --accent-color: #0066cc;
-            --card-bg: #f4f4f4;
-            --code-font: 'Courier New', Courier, monospace;
-            --body-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --transition-speed: 0.3s;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dan Cardoz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-        /* DARK MODE VARIABLES */
-        [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --text-color: #e0e0e0;
-            --accent-color: #66b3ff;
-            --card-bg: #2d2d2d;
-        }
+    :root {
+      --txt: #e0e0e0;
+      --txt2: #a0a8b8;
+      --txt3: #606878;
+      --accent: #66b3ff;
+      --card-bg: rgba(20,24,36,0.72);
+      --card-border: rgba(255,255,255,0.10);
+      --card-border-hover: #66b3ff;
+      --skill-bg: rgba(255,255,255,0.07);
+      --skill-border: rgba(255,255,255,0.12);
+      --btn-border: rgba(255,255,255,0.35);
+      --btn-hover-bg: rgba(255,255,255,0.9);
+      --btn-hover-txt: #0a0e1a;
+      --section-border: rgba(255,255,255,0.08);
+      --h2-border: #66b3ff;
+      --footer-txt: #505868;
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--body-font);
-            line-height: 1.6;
-            transition: background-color var(--transition-speed), color var(--transition-speed);
-            
-            /* RESPONSIVE CHANGE: Increased width for big monitors */
-            max-width: 1100px; 
-            margin: 0 auto;
-            padding: 20px;
-        }
+    [data-theme="light"] {
+      --txt: #111827;
+      --txt2: #374151;
+      --txt3: #6b7280;
+      --accent: #185FA5;
+      --card-bg: rgba(255,255,255,0.82);
+      --card-border: rgba(0,0,0,0.10);
+      --card-border-hover: #185FA5;
+      --skill-bg: rgba(0,0,0,0.05);
+      --skill-border: rgba(0,0,0,0.10);
+      --btn-border: rgba(0,0,0,0.35);
+      --btn-hover-bg: rgba(0,0,0,0.85);
+      --btn-hover-txt: #ffffff;
+      --section-border: rgba(0,0,0,0.08);
+      --h2-border: #185FA5;
+      --footer-txt: #9ca3af;
+    }
 
-        /* HEADER */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 40px 0;
-            border-bottom: 2px solid var(--card-bg);
-            margin-bottom: 40px;
-        }
+    .site { position: relative; z-index: 1; font-family: 'Courier New', monospace; color: var(--txt); max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; transition: color 0.3s; }
+    header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 32px; border-bottom: 1px solid var(--section-border); margin-bottom: 48px; flex-wrap: wrap; gap: 16px; }
+    h1 { font-size: 2rem; font-weight: 500; letter-spacing: -0.5px; color: var(--txt); }
+    .role { color: var(--accent); font-size: 0.95rem; margin-top: 4px; transition: color 0.3s; }
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn { cursor: pointer; background: transparent; border: 1px solid var(--btn-border); color: var(--txt); padding: 8px 18px; font-family: 'Courier New', monospace; font-size: 0.78rem; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s, color 0.2s, border-color 0.3s; }
+    .btn:hover { background: var(--btn-hover-bg); color: var(--btn-hover-txt); }
+    section { margin-bottom: 56px; }
+    h2 { font-size: 1.2rem; font-weight: 500; margin-bottom: 20px; padding-left: 12px; border-left: 3px solid var(--h2-border); color: var(--txt); transition: border-color 0.3s; }
+    p { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.7; font-size: 0.95rem; color: var(--txt2); transition: color 0.3s; }
+    .skills { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+    .skill { background: var(--skill-bg); border: 0.5px solid var(--skill-border); padding: 5px 12px; border-radius: 4px; font-size: 0.82rem; font-family: 'Courier New', monospace; color: var(--txt); transition: background 0.3s, border-color 0.3s, color 0.3s; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+    .card { background: var(--card-bg); border: 0.5px solid var(--card-border); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, border-color 0.2s, background 0.3s; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .card:hover { transform: translateY(-4px); border-color: var(--card-border-hover); }
+    .card-title { font-weight: 500; font-size: 0.95rem; margin-bottom: 8px; display: block; color: var(--txt); font-family: -apple-system, sans-serif; transition: color 0.3s; }
+    .card p { font-size: 0.85rem; color: var(--txt2); margin: 0; }
+    .card-link { color: var(--accent); text-decoration: none; font-size: 0.82rem; font-weight: 500; margin-top: 14px; display: inline-block; transition: color 0.3s; }
+    .card-link:hover { text-decoration: underline; }
+    .contact-link { color: var(--accent); transition: color 0.3s; }
+    footer { text-align: center; font-size: 0.75rem; color: var(--footer-txt); padding-bottom: 20px; margin-top: 40px; font-family: sans-serif; transition: color 0.3s; }
 
-        .header-content h1 { font-family: var(--code-font); font-size: 1.8rem; }
-        .role { color: var(--accent-color); font-weight: bold; font-family: var(--code-font); }
-
-        /* BUTTON CONTAINER */
-        .button-group {
-            display: flex; 
-            gap: 10px; 
-            align-items: center;
-        }
-
-        /* TOGGLE BUTTON & LINKS */
-        .theme-toggle {
-            cursor: pointer;
-            background: none;
-            border: 2px solid var(--text-color);
-            color: var(--text-color);
-            width: 160px;
-            height: 40px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0 10px;
-            font-family: var(--code-font);
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.8rem;
-            box-sizing: border-box;
-            transition: all 0.2s;
-        }
-        
-        .theme-toggle:hover {
-            background-color: var(--text-color);
-            color: var(--bg-color);
-        }
-
-        /* SECTIONS */
-        section { margin-bottom: 60px; }
-        h2 { 
-            font-size: 1.5rem; 
-            margin-bottom: 20px; 
-            border-left: 4px solid var(--accent-color);
-            padding-left: 10px;
-        }
-
-        /* SKILLS GRID */
-        .skills-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            list-style: none;
-        }
-        .skill-tag {
-            background-color: var(--card-bg);
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-family: var(--code-font);
-        }
-
-        /* PROJECTS GRID */
-        .projects-grid {
-            display: grid;
-            /* RESPONSIVE CHANGE: This auto-fits. On big screens = 3 columns. Phone = 1 column. */
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .project-card {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .project-card:hover { transform: translateY(-5px); }
-        .project-title { font-weight: bold; margin-bottom: 10px; display: block; }
-        .project-link { 
-            color: var(--accent-color); 
-            text-decoration: none; 
-            font-weight: bold; 
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-top: 15px;
-        }
-
-        /* FOOTER */
-        footer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #777;
-            margin-top: 80px;
-            padding-bottom: 20px;
-        }
-
-        /* =========================================
-           MOBILE OPTIMIZATIONS (Media Query)
-           Triggers when screen is smaller than 768px (Tablets & Phones)
-           ========================================= */
-        @media (max-width: 768px) {
-            
-            /* Stack Header Vertically */
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-                padding: 30px 0;
-            }
-
-            /* Stack Buttons Vertically for easier thumb tapping */
-            .button-group {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            /* Make buttons full width on phone */
-            .theme-toggle {
-                width: 100%; 
-            }
-
-            /* Reduce font sizes slightly */
-            h1 { font-size: 1.5rem; }
-            h2 { font-size: 1.3rem; }
-            
-            /* Tweak padding */
-            body { padding: 15px; }
-        }
-    </style>
+    @media (max-width: 768px) {
+      header { flex-direction: column; align-items: flex-start; padding: 30px 0; }
+      .btn-group { width: 100%; flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.1rem; }
+      body { padding: 15px; }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-content">
-            <h1>Dan Cardoz</h1>
-            <span class="role">&lt;Software Engineer /&gt;</span>
-        </div>
-        
-        <div class="button-group">
-            <a href="#" onclick="handleCloudClick(event)" class="theme-toggle">☁️ Private cloud</a>
-            
-            <button class="theme-toggle" id="theme-btn">Light Mode</button>
-        </div>
-    </header>
+<canvas id="bg"></canvas>
 
-    <section id="about">
-        <h2>About Me</h2>
-        <p>
-            I am a software developer with a passion for building clean, efficient backend systems and scalable web applications. 
-            Currently focusing on home-lab server management and cloud infrastructure. 
-            I believe in open-source and minimalist code.
-        </p>
-    </section>
+<div class="site" id="site">
+  <header>
+    <div>
+      <h1>Dan Cardoz</h1>
+      <div class="role">&lt;Software Engineer /&gt;</div>
+    </div>
+    <div class="btn-group">
+      <a href="#" onclick="handleCloudClick(event)" class="btn">&#9729; Private cloud</a>
+      <button class="btn" id="theme-btn">&#9728; Light Mode</button>
+    </div>
+  </header>
 
-    <section id="skills">
-        <h2>Tech Stack</h2>
-        <ul class="skills-list">
-            <li class="skill-tag">Python</li>
-            <li class="skill-tag">Java</li>
-            <li class="skill-tag">C++</li>
-            <li class="skill-tag">SQL</li>
-            <li class="skill-tag">JavaScript</li>
-            <li class="skill-tag">LaTeX</li>
-            <li class="skill-tag">Docker</li>
-            <li class="skill-tag">Git</li>
-            <li class="skill-tag">Linux / Bash</li>
-            <li class="skill-tag">Power Automate</li>
-        </ul>
-    </section>
+  <section id="about">
+    <h2>About Me</h2>
+    <p>I am a software developer with a passion for building clean, efficient backend systems and scalable web applications. Currently focusing on home-lab server management and cloud infrastructure. I believe in open-source and minimalist code.</p>
+  </section>
 
-    <section id="projects">
-        <h2>Selected Projects</h2>
-        <div class="projects-grid">
-            
-            <div class="project-card">
-                <div>
-                    <span class="project-title">HPC Performance Analysis</span>
-                    <p>Hybrid performance analysis for parallel apps using TAU and Linux perf. Developed Python scripts to visualize runtime bottlenecks.</p>
-                </div>
-               // <a href="#" class="project-link">View Code &rarr;</a>
-            </div>
+  <section id="skills">
+    <h2>Tech Stack</h2>
+    <ul class="skills">
+      <li class="skill">Python</li><li class="skill">Java</li><li class="skill">C++</li>
+      <li class="skill">SQL</li><li class="skill">JavaScript</li><li class="skill">LaTeX</li>
+      <li class="skill">Docker</li><li class="skill">Git</li><li class="skill">Linux / Bash</li>
+      <li class="skill">Power Automate</li>
+    </ul>
+  </section>
 
-            <div class="project-card">
-                <div>
-                    <span class="project-title">Recycle Heroes (Android)</span>
-                    <p>Native Android app integrating Mapbox SDK to locate recycling stations. Implemented custom socket networking and JSON parsing.</p>
-                </div>
-                <a href="https://github.com/HaqmuinDox/recycleheros-v-2.0-main" class="project-link">View Code &rarr;</a>
-            </div>
+  <section id="projects">
+    <h2>Selected Projects</h2>
+    <div class="grid">
+      <div class="card">
+        <div><span class="card-title">HPC Performance Analysis</span><p>Hybrid performance analysis for parallel apps using TAU and Linux perf. Python scripts to visualise runtime bottlenecks.</p></div>
+        <span style="color:var(--txt3);font-size:0.78rem;margin-top:14px;display:inline-block;">private repo</span>
+      </div>
+      <div class="card">
+        <div><span class="card-title">Recycle Heroes (Android)</span><p>Native Android app integrating Mapbox SDK to locate recycling stations. Custom socket networking and JSON parsing.</p></div>
+        <a href="https://github.com/HaqmuinDox/recycleheros-v-2.0-main" class="card-link">View Code &rarr;</a>
+      </div>
+      <div class="card">
+        <div><span class="card-title">Private Cloud Infrastructure</span><p>24/7 Ubuntu hub managing 8 Docker containers (Nextcloud, Vaultwarden, n8n) secured via Tailscale VPN.</p></div>
+        <a href="#" onclick="handleCloudClick(event)" class="card-link">Open Cloud &rarr;</a>
+      </div>
+      <div class="card">
+        <div><span class="card-title">Portfolio Site</span><p>You are looking at it. A barebones, performant HTML/CSS site hosted on GitHub Pages with custom DNS.</p></div>
+        <a href="https://github.com/HaqmuinDox/HaqmuinDox.github.io" class="card-link">View Code &rarr;</a>
+      </div>
+    </div>
+  </section>
 
-            <div class="project-card">
-                <div>
-                    <span class="project-title">Private Cloud Infrastructure</span>
-                    <p>Orchestrated a 24/7 Ubuntu hub managing 8 Docker containers (Nextcloud, Vaultwarden, n8n) secured exclusively via Tailscale VPN.</p>
-                </div>
-               // <a href="https://dan-esprimo.end-nase.ts.net/index.php/s/B3WLySTBecw7aYK" class="project-link">View Code &rarr;</a> 
-            </div>
+  <section id="contact">
+    <h2>Get in Touch</h2>
+    <p>Interested in collaboration or just want to chat about tech?<br>
+    <a class="contact-link" href="mailto:starkdan8+website@gmail.com">starkdan8@gmail.com</a></p>
+  </section>
 
-            <div class="project-card">
-                <div>
-                    <span class="project-title">Portfolio Site</span>
-                    <p>You are looking at it. A barebones, performant HTML/CSS site hosted on GitHub Pages with custom DNS.</p>
-                </div>
-                <a href="https://github.com/HaqmuinDox/HaqmuinDox.github.io" class="project-link">View Code &rarr;</a>
-            </div>
+  <footer>&copy; 2025 Dan Cardoz &mdash; Built with Vanilla HTML/CSS</footer>
+</div>
 
-        </div>
-    </section>
+<script>
+  // ============================================================
+  // SHADER SETTINGS — adjust these two values to taste
+  // ============================================================
+  const SHADER_SPEED     = 3;   // Animation speed.     Range: 1 (glacial) – 20 (frantic)
+  const SHADER_INTENSITY = 16;   // Color intensity.     Range: 1 (subtle)  – 20 (vivid)
+  // ============================================================
 
-    <section id="contact">
-        <h2>Get in Touch</h2>
-        <p>
-            Interested in collaboration or just want to chat about tech?
-            <br>
-            <a href="mailto:starkdan8+website@gmail.com" style="color: var(--accent-color);">starkdan8@gmail.com</a>
-        </p>
-    </section>
+  const canvas = document.getElementById('bg');
+  const gl = canvas.getContext('webgl');
 
-    <footer>
-        &copy; 2025 Dan Cardoz. Built with Vanilla HTML/CSS.
-    </footer>
+  const VS = `attribute vec2 a;void main(){gl_Position=vec4(a,0,1);}`;
 
-    <script>
-        // JAVASCRIPT
-        const toggleBtn = document.getElementById('theme-btn');
-        const htmlElement = document.documentElement;
+  const FS_DARK = `
+  precision highp float;
+  uniform float t,spd,intensity;uniform vec2 res;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float n(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(h(i),h(i+vec2(1,0)),u.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),u.x),u.y);}
+  float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.1+vec2(1.3);a*=0.5;}return v;}
+  void main(){
+    vec2 uv=gl_FragCoord.xy/res;uv.x*=res.x/res.y;
+    float tt=t*spd*0.04;
+    vec2 q=vec2(fbm(uv+tt),fbm(uv+vec2(5.2,1.3)+tt*0.8));
+    vec2 r=vec2(fbm(uv+2.0*q+vec2(1.7,9.2)+tt*0.6),fbm(uv+2.0*q+vec2(8.3,2.8)+tt*0.4));
+    float f=smoothstep(0.0,1.0,fbm(uv+2.8*r+tt*0.3));
+    float s=intensity*0.025;
+    vec3 col=mix(vec3(0.02,0.02,0.06),vec3(0.05,0.12,0.28),f*s*2.0);
+    col=mix(col,vec3(0.1,0.25,0.55),clamp(f*s*3.0-0.5,0.0,1.0));
+    col=mix(col,vec3(0.3,0.5,0.9),clamp(f*s*4.0-1.5,0.0,1.0));
+    gl_FragColor=vec4(col,1.0);
+  }`;
 
-        const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : 'dark';
+  const FS_LIGHT = `
+  precision highp float;
+  uniform float t,spd,intensity;uniform vec2 res;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float n(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);return mix(mix(h(i),h(i+vec2(1,0)),u.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),u.x),u.y);}
+  float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.1+vec2(1.3);a*=0.5;}return v;}
+  void main(){
+    vec2 uv=gl_FragCoord.xy/res;uv.x*=res.x/res.y;
+    float tt=t*spd*0.04;
+    vec2 q=vec2(fbm(uv+tt),fbm(uv+vec2(5.2,1.3)+tt*0.8));
+    vec2 r=vec2(fbm(uv+2.0*q+vec2(1.7,9.2)+tt*0.6),fbm(uv+2.0*q+vec2(8.3,2.8)+tt*0.4));
+    float f=smoothstep(0.0,1.0,fbm(uv+2.8*r+tt*0.3));
+    float s=intensity*0.025;
+    vec3 col=mix(vec3(0.92,0.95,1.0),vec3(0.72,0.85,0.97),f*s*2.0);
+    col=mix(col,vec3(0.55,0.73,0.93),clamp(f*s*3.0-0.5,0.0,1.0));
+    col=mix(col,vec3(0.35,0.55,0.82),clamp(f*s*4.0-1.5,0.0,1.0));
+    gl_FragColor=vec4(col,1.0);
+  }`;
 
-        if (currentTheme) {
-            htmlElement.setAttribute('data-theme', currentTheme);
-            updateButtonText(currentTheme);
-        }
+  function buildProg(fsSrc) {
+    function mk(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+    const p = gl.createProgram();
+    gl.attachShader(p, mk(gl.VERTEX_SHADER, VS));
+    gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(p);
+    return p;
+  }
 
-        toggleBtn.addEventListener('click', () => {
-            let theme = htmlElement.getAttribute('data-theme');
-            
-            if (theme === 'dark') {
-                htmlElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-                updateButtonText('light');
-            } else {
-                htmlElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                updateButtonText('dark');
-            }
-        });
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
 
-        function updateButtonText(theme) {
-            toggleBtn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-        }
-		
-		async function handleCloudClick(event) {
-        event.preventDefault(); // Stop the link from doing anything default
+  let progDark = buildProg(FS_DARK);
+  let progLight = buildProg(FS_LIGHT);
+  let curProg = progDark;
 
-        // 1. Define your URLs
-        const realUrl = "https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/";
-        const fakeUrl = "/secure-cloud"; // This triggers your 404.html
+  function useProg(p) {
+    gl.useProgram(p);
+    const al = gl.getAttribLocation(p, 'a');
+    gl.enableVertexAttribArray(al);
+    gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+    curProg = p;
+  }
+  useProg(progDark);
 
-        // 2. Open a new tab immediately (prevents popup blockers)
-        // We set it to a temporary 'loading' state
-        const newWindow = window.open("", "_blank");
-        newWindow.document.write("<html><body style='background:#111; color:#fff; font-family:monospace; display:flex; justify-content:center; align-items:center; height:100vh;'>Connecting...</body></html>");
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; gl.viewport(0, 0, canvas.width, canvas.height); }
+  resize();
+  window.addEventListener('resize', resize);
 
-        try {
-            // 3. Set a timeout (e.g., 1500ms = 1.5 seconds)
-            // If the server doesn't answer in 1.5s, we assume you aren't on VPN.
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1000*5);
+  let start = performance.now();
+  (function loop() {
+    const t = (performance.now() - start) / 1000;
+    gl.uniform1f(gl.getUniformLocation(curProg, 't'), t);
+    gl.uniform2f(gl.getUniformLocation(curProg, 'res'), canvas.width, canvas.height);
+    gl.uniform1f(gl.getUniformLocation(curProg, 'spd'), SHADER_SPEED);
+    gl.uniform1f(gl.getUniformLocation(curProg, 'intensity'), SHADER_INTENSITY);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    requestAnimationFrame(loop);
+  })();
 
-            // 4. Try to touch the server
-            // mode: 'no-cors' allows us to 'knock' on the door even if we can't read the response
-            await fetch(realUrl, { 
-                mode: 'no-cors', 
-                signal: controller.signal 
-            });
-
-            // 5. SUCCESS: Server exists! Go to the real URL.
-            clearTimeout(timeoutId);
-            newWindow.location.href = realUrl;
-
-        } catch (error) {
-            // 6. FAILURE: Server unreachable or timed out. Go to 404.
-            newWindow.location.href = fakeUrl;
-        }
+  const btn = document.getElementById('theme-btn');
+  const site = document.getElementById('site');
+  let dark = true;
+  btn.onclick = () => {
+    dark = !dark;
+    if (dark) {
+      site.removeAttribute('data-theme');
+      useProg(progDark);
+      btn.textContent = '\u2600 Light Mode';
+    } else {
+      site.setAttribute('data-theme', 'light');
+      useProg(progLight);
+      btn.textContent = '\uD83C\uDF19 Dark Mode';
     }
-    </script>
+  };
+
+  async function handleCloudClick(event) {
+    event.preventDefault();
+    const realUrl = "https://dan-esprimo.end-nase.ts.net/index.php/apps/dashboard/";
+    const win = window.open("", "_blank");
+    win.document.write("<html><body style='background:#111;color:#fff;font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;'>Connecting...</body></html>");
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 5000);
+      await fetch(realUrl, { mode: 'no-cors', signal: ctrl.signal });
+      win.location.href = realUrl;
+    } catch (e) {
+      win.location.href = "/secure-cloud";
+    }
+  }
+</script>
 </body>
 </html>
