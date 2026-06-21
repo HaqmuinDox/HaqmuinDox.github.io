@@ -20,3 +20,6 @@ _site/
 # Env / secrets
 .env
 .env.local
+
+# Claude Code
+CLAUDE.md
