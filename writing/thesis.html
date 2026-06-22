@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Self-hosting Nextcloud behind Tailscale — dan.cardoz</title>
-<meta name="description" content="How I set up Nextcloud on Ubuntu behind a Tailscale VPN — covering Docker networking, SSL termination via Apache, and the config quirks that took me a few evenings to figure out.">
+<title>A Topic To Be Found — dan.cardoz</title>
+<meta name="description" content="On the process of finding a thesis topic — and why there's less left to discover than you'd expect.">
 <script>(function(){var t;try{t=localStorage.getItem('dc-theme')}catch(e){}if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}if(t==='light')document.documentElement.setAttribute('data-theme','light')})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,113 +243,23 @@
   <!-- CENTER: article content -->
   <article>
     <div class="article-meta">
-      <span class="article-date">2026 · 03</span>
-      <span class="article-tag">notes</span>
-      <span class="article-readtime">6 min read</span>
+      <span class="article-date">2026 · 06</span>
+      <span class="article-tag">writing</span>
+      <span class="article-readtime">2 min read</span>
     </div>
-    <h1 class="article-title">Self-hosting Nextcloud behind Tailscale</h1>
+    <h1 class="article-title">A Topic To Be Found</h1>
 
     <div class="prose">
-      <p>Running your own cloud sounds like a weekend project. In my case it turned into a proper infrastructure — Nextcloud, Vaultwarden, n8n, Dawarich, and a few more containers, all restricted to a Tailscale mesh so they&#39;re never exposed to the open internet. This post covers the Nextcloud piece specifically: getting it running reliably behind Tailscale with SSL from Let&#39;s Encrypt.</p>
-<h2 id="why-tailscale-instead-of-a-public-reverse-proxy">Why Tailscale instead of a public reverse proxy</h2>
-<p>The tempting path is to put Nginx or Caddy on a VPS, forward traffic, and get automatic HTTPS. I tried that. The problem: your files and your password manager are accessible to anyone who can reach that IP. Even with strong passwords, you&#39;re one misconfigured firewall rule away from trouble.</p>
-<p>Tailscale solves this by making your services reachable only to devices enrolled in your tailnet. No public IP, no open ports. The tradeoff: you can&#39;t share links with people outside your tailnet, which is fine for a personal setup.</p>
-<h2 id="prerequisites">Prerequisites</h2>
-<ul>
-<li>Ubuntu server</li>
-<li>Docker and Docker Compose installed</li>
-<li>Tailscale installed and authenticated on the server</li>
-<li>A domain name (e.g. <code>nextcloud.home.example.com</code>) with DNS pointing to your Tailscale IP</li>
-</ul>
-<h3 id="get-your-tailscale-ip">Get your Tailscale IP</h3>
-<pre><code class="language-bash">tailscale ip -4
-# → 100.x.x.x
-</code></pre>
-<p>Add an A record in your DNS provider pointing your chosen hostname to that IP. Because this is a private IP, only devices in your tailnet will be able to resolve it to something reachable.</p>
-<h2 id="docker-compose-setup">Docker Compose setup</h2>
-<pre><code class="language-yaml">version: &quot;3.9&quot;
-services:
-  nextcloud:
-    image: nextcloud:latest
-    restart: unless-stopped
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${NC_DB_PASSWORD}
-      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.home.example.com
-    volumes:
-      - nextcloud_data:/var/www/html
-    depends_on:
-      - db
-
-  db:
-    image: mariadb:latest
-    restart: unless-stopped
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${NC_DB_PASSWORD}
-    volumes:
-      - db_data:/var/lib/mysql
-
-volumes:
-  nextcloud_data:
-  db_data:
-</code></pre>
-<p>Note: <code>NEXTCLOUD_TRUSTED_DOMAINS</code> must exactly match the hostname you&#39;ll use. Nextcloud blocks requests from unrecognised hosts — this caught me off guard the first time.</p>
-<h2 id="ssl-with-apache-and-let-39-s-encrypt">SSL with Apache and Let&#39;s Encrypt</h2>
-<p>Nextcloud recommends Apache as the reverse proxy. Install it and enable the required modules:</p>
-<pre><code class="language-bash">sudo apt install apache2
-sudo a2enmod proxy proxy_http ssl rewrite headers
-</code></pre>
-<p>Then add a virtual host:</p>
-<pre><code class="language-apache">&lt;VirtualHost *:443&gt;
-  ServerName nextcloud.home.example.com
-
-  SSLEngine on
-  SSLCertificateFile    /etc/letsencrypt/live/nextcloud.home.example.com/fullchain.pem
-  SSLCertificateKeyFile /etc/letsencrypt/live/nextcloud.home.example.com/privkey.pem
-
-  ProxyPass        / http://localhost:8080/
-  ProxyPassReverse / http://localhost:8080/
-
-  RequestHeader set X-Forwarded-Proto &quot;https&quot;
-  RequestHeader set X-Forwarded-Port  &quot;443&quot;
-&lt;/VirtualHost&gt;
-</code></pre>
-<h3 id="certbot-with-tailscale">Certbot with Tailscale</h3>
-<p>Here&#39;s the non-obvious part: Certbot&#39;s HTTP-01 challenge requires a publicly reachable server, but yours isn&#39;t public. Use the DNS-01 challenge instead — it proves domain ownership through a TXT record, not an HTTP endpoint.</p>
-<pre><code class="language-bash">sudo apt install certbot python3-certbot-dns-&lt;your-provider&gt;
-sudo certbot certonly \
-  --dns-&lt;your-provider&gt; \
-  -d nextcloud.home.example.com
-</code></pre>
-<p>Replace <code>&lt;your-provider&gt;</code> with your DNS provider&#39;s plugin (e.g. <code>cloudflare</code>, <code>namecheap</code>). You&#39;ll need an API token with permission to add TXT records.</p>
-<h2 id="nextcloud-config-tweaks">Nextcloud config tweaks</h2>
-<p>After the first login, Nextcloud will likely warn about a few missing config values. Edit <code>/path/to/nextcloud/config/config.php</code>:</p>
-<pre><code class="language-php">&#39;overwriteprotocol&#39; =&gt; &#39;https&#39;,
-&#39;overwritehost&#39;     =&gt; &#39;nextcloud.home.example.com&#39;,
-&#39;trusted_proxies&#39;   =&gt; [&#39;127.0.0.1&#39;],
-</code></pre>
-<p>Without <code>overwriteprotocol</code>, Nextcloud generates <code>http://</code> URLs for WebDAV and caldav even when your clients are connecting over HTTPS — sync clients will fail silently.</p>
-<h2 id="background-jobs">Background jobs</h2>
-<p>Nextcloud&#39;s background jobs (thumbnail generation, activity cleanup, etc.) default to AJAX mode, which only runs when someone has the web UI open. Set them to cron:</p>
-<pre><code class="language-bash"># On the host, not inside the container
-* * * * * docker exec &lt;nextcloud-container-name&gt; \
-  php -f /var/www/html/cron.php
-</code></pre>
-<p>The container name depends on your Compose project name. Check with <code>docker ps</code>.</p>
-<h2 id="result">Result</h2>
-<p>After all this: Nextcloud is accessible from any device in my tailnet, syncing contacts, calendars, and files. The private IP means it never appears in any internet scan. Certbot renews the certificate automatically via a systemd timer.</p>
-<p>Total monthly cost: electricity for the server and the domain name.</p>
+      <h1>A Topic To Be Found</h1>
+<p>The process of finding a thesis topic can be once of the most troublesome problems of this day. While the scientific method pushes us ever forward on the path to progress, it may come as a surprise to people who aren’t in the industry — there isn’t a lot remaining to create.</p>
+<p>Needless to say, it is of utmost importance to keep an eye out for this kind of stuff, right from the point when you are matriculated into your course.</p>
+<p>I wish you all the best in your future endeavors.</p>
 
     </div>
 
     <nav class="pagination" aria-label="Article navigation">
-      <a href="/writing/profiling-tau-perf.html"  class="pag-link pag-prev">← Profiling parallel apps with TAU & perf</a>
-      <a href="/writing/thesis.html"  class="pag-link pag-next">A Topic To Be Found →</a>
+      <a href="/writing/nextcloud-tailscale.html"  class="pag-link pag-prev">← Self-hosting Nextcloud behind Tailscale</a>
+      
     </nav>
 
     <a href="/writing/" class="back-link">← All writing</a>
@@ -358,7 +268,7 @@ sudo certbot certonly \
   <!-- RIGHT: sticky ToC -->
   <aside class="toc-aside">
     <p class="toc-label">On this page</p>
-    <ul class="toc-list"><li><a href="#why-tailscale-instead-of-a-public-reverse-proxy" class="toc-link">Why Tailscale instead of a public reverse proxy</a></li><li><a href="#prerequisites" class="toc-link">Prerequisites</a></li><li class="toc-h3"><a href="#get-your-tailscale-ip" class="toc-link">Get your Tailscale IP</a></li><li><a href="#docker-compose-setup" class="toc-link">Docker Compose setup</a></li><li><a href="#ssl-with-apache-and-let-39-s-encrypt" class="toc-link">SSL with Apache and Let&#39;s Encrypt</a></li><li class="toc-h3"><a href="#certbot-with-tailscale" class="toc-link">Certbot with Tailscale</a></li><li><a href="#nextcloud-config-tweaks" class="toc-link">Nextcloud config tweaks</a></li><li><a href="#background-jobs" class="toc-link">Background jobs</a></li><li><a href="#result" class="toc-link">Result</a></li></ul>
+    
   </aside>
 
 </div>
