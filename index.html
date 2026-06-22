@@ -90,10 +90,6 @@
     [style*="grid-template-columns:108px"] { grid-template-columns: 1fr !important; gap: 4px !important; }
     /* Stack skill group label */
     [style*="grid-template-columns:118px"] { grid-template-columns: 1fr !important; gap: 8px !important; }
-    /* Collapse writing preview list — stack date above title, hide readtime */
-    #writing a[data-reveal] { grid-template-columns: 1fr !important; gap: 2px !important; padding: 12px 6px !important; }
-    #writing a[data-reveal] > span:last-child { display: none; }
-    #writing a[data-reveal] > span:nth-child(2) { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
   }
   @media (prefers-reduced-motion: no-preference) {
     [data-motion="ready"] [data-reveal] {
@@ -286,28 +282,6 @@
                 </sc-for>
               </ul>
             </div>
-          </sc-for>
-        </div>
-      </section>
-
-      <!-- WRITING -->
-      <section id="writing" style="scroll-margin-top:82px;">
-        <div data-reveal style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-          <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--accent);">05</span>
-          <h2 style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0;">Writing &amp; Notes</h2>
-          <span style="flex:1;height:1px;background:var(--section-border);"></span>
-        </div>
-        <p data-reveal style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--txt3);margin:0 0 16px;">// a small digital garden — work in progress</p>
-        <div style="display:flex;flex-direction:column;">
-          <sc-for list="{{ posts }}" as="post" hint-placeholder-count="3">
-            <a href="{{ post.href }}" data-reveal style="display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:center;padding:15px 6px;border-top:1px solid var(--section-border);text-decoration:none;transition:padding-left .18s;" style-hover="padding-left:14px;">
-              <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.68rem;color:var(--txt3);">{{ post.date }}</span>
-              <span style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;">
-                <span style="font-weight:600;font-size:0.93rem;color:var(--txt);">{{ post.title }}</span>
-                <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.62rem;color:var(--accent);background:var(--skill-bg);border:0.5px solid var(--skill-border);border-radius:3px;padding:2px 7px;flex:none;">{{ post.tag }}</span>
-              </span>
-              <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;color:var(--txt3);white-space:nowrap;">{{ post.readtime }} ↗</span>
-            </a>
           </sc-for>
         </div>
       </section>
@@ -658,8 +632,7 @@ class Component extends DCLogic {
         { idx: '02', label: 'Experience', href: '#experience' },
         { idx: '03', label: 'Projects',   href: '#projects' },
         { idx: '04', label: 'Stack',      href: '#skills' },
-        { idx: '05', label: 'Writing',    href: '#writing' },
-        { idx: '06', label: 'Contact',    href: '#contact' }
+        { idx: '05', label: 'Contact',    href: '#contact' }
       ],
       socials: [
         { label: 'GitHub',   href: 'https://github.com/HaqmuinDox' },
@@ -734,12 +707,6 @@ class Component extends DCLogic {
         { label: 'Dev Tools',       items: ['Git', 'VS Code', 'Anypoint Studio'] }
       ],
       marqueeItems: [...allSkills, ...allSkills],
-      posts: [
-        { date: '2026 · 06', title: 'A Topic To Be Found', tag: 'writing', readtime: '2 min', href: '/writing/thesis.html' },
-        { date: '2026 · 03', title: 'Self-hosting Nextcloud behind Tailscale', tag: 'notes', readtime: '6 min', href: '/writing/nextcloud-tailscale.html' },
-        { date: '2026 · 01', title: 'Profiling parallel apps with TAU & perf', tag: 'writing', readtime: '9 min', href: '/writing/profiling-tau-perf.html' },
-        { date: '2025 · 11', title: 'My Docker homelab, container by container', tag: 'cheatsheet', readtime: '5 min', href: '/writing/docker-homelab.html' }
-      ],
       latestPost: { date: '2026 · 06', title: 'A Topic To Be Found', href: '/writing/thesis.html' },
       education: [
         {
