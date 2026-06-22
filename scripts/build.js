@@ -84,6 +84,21 @@ function buildIndexPage(posts) {
   @keyframes pulseDot { 0%,100%{box-shadow:0 0 0 0 rgba(102,179,255,.55)} 65%{box-shadow:0 0 0 7px rgba(102,179,255,0)} }
   #search:focus { border-color: var(--accent) !important; }
   .post-row:hover { padding-left: 14px !important; }
+
+  /* ── Mobile header & listing ── */
+  @media (max-width: 640px) {
+    header > div { padding-left: 16px !important; padding-right: 16px !important; }
+    header nav { gap: 14px !important; }
+    #wl-content { padding: 36px 20px 80px !important; }
+  }
+  @media (max-width: 480px) {
+    header nav { gap: 10px !important; }
+    header nav a, header nav button { font-size: 0.65rem !important; }
+    header nav a:nth-of-type(3) { display: none !important; }
+    #wl-content { padding: 24px 14px 60px !important; }
+    .post-row { grid-template-columns: 1fr !important; gap: 2px !important; padding: 12px 6px !important; }
+    .post-row > span:last-child { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -106,7 +121,7 @@ function buildIndexPage(posts) {
   </div>
 </header>
 
-<div style="max-width:780px;margin:0 auto;padding:52px 48px 120px;position:relative;z-index:1;">
+<div id="wl-content" style="max-width:780px;margin:0 auto;padding:52px 48px 120px;position:relative;z-index:1;">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
     <a href="/" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">← home</a>
     <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--accent);">05</span>

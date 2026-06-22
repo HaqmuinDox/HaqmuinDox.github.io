@@ -36,6 +36,64 @@
     [data-layout] { grid-template-columns: 1fr; padding: 0 20px 100px; }
     [data-sidebar] { position: static; padding-top: 32px; }
   }
+  /* ── Hamburger button (hidden on desktop) ── */
+  #menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 1px solid var(--btn-border);
+    border-radius: 6px;
+    color: var(--txt);
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex: none;
+    transition: border-color .2s, color .2s;
+  }
+  /* ── Mobile header & nav ── */
+  @media (max-width: 640px) {
+    header > div { padding-left: 16px !important; padding-right: 16px !important; }
+    #menu-btn { display: flex; }
+    header nav {
+      display: none !important;
+      position: absolute !important;
+      top: 64px !important; left: 0 !important; right: 0 !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0 !important;
+      background: color-mix(in oklab, var(--page-bg) 96%, transparent) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-bottom: 1px solid var(--section-border) !important;
+      padding: 8px 20px 16px !important;
+      z-index: 39 !important;
+    }
+    header nav.open { display: flex !important; }
+    header nav a, header nav button {
+      padding: 12px 4px !important;
+      font-size: 0.82rem !important;
+      min-height: 44px;
+      display: flex !important;
+      align-items: center !important;
+      border-top: 1px solid var(--section-border) !important;
+    }
+    header nav > *:first-child { border-top: none !important; }
+  }
+  /* ── Compact layout at small phone widths ── */
+  @media (max-width: 480px) {
+    [data-layout] { padding: 0 14px 80px; }
+    [data-sidebar] { padding-top: 20px; }
+    [data-main] { gap: 48px; padding-top: 32px; }
+    /* Stack experience / education / education date column */
+    [style*="grid-template-columns:108px"] { grid-template-columns: 1fr !important; gap: 4px !important; }
+    /* Stack skill group label */
+    [style*="grid-template-columns:118px"] { grid-template-columns: 1fr !important; gap: 8px !important; }
+    /* Collapse writing preview list — stack date above title, hide readtime */
+    #writing a[data-reveal] { grid-template-columns: 1fr !important; gap: 2px !important; padding: 12px 6px !important; }
+    #writing a[data-reveal] > span:last-child { display: none; }
+  }
   @media (prefers-reduced-motion: no-preference) {
     [data-motion="ready"] [data-reveal] {
       opacity: 0;
@@ -83,6 +141,7 @@
           <span>{{ themeIcon }}</span>{{ themeLabel }}
         </button>
       </nav>
+      <button id="menu-btn" aria-label="Menu">☰</button>
     </div>
   </header>
 
@@ -354,6 +413,7 @@ class Component extends DCLogic {
     this.setupCursor();
     this.setupScroll();
     this.setupCardTilt();
+    this.setupMobileMenu();
   }
 
   componentDidUpdate(prevProps) {
@@ -524,10 +584,27 @@ class Component extends DCLogic {
   _updateGalleryBtns() {
     const el = this.galleryEl;
     if (!el || !this.galleryPrevBtn || !this.galleryNextBtn) return;
+    if (window.matchMedia('(hover: none)').matches) return;
     const atStart = el.scrollLeft <= 4;
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
     this.galleryPrevBtn.style.display = atStart ? 'none' : 'flex';
     this.galleryNextBtn.style.display = atEnd ? 'none' : 'flex';
+  }
+
+  setupMobileMenu() {
+    const btn = document.getElementById('menu-btn');
+    const nav = document.querySelector('header nav');
+    if (!btn || !nav) return;
+    btn.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      btn.textContent = open ? '✕' : '☰';
+    });
+    nav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        nav.classList.remove('open');
+        btn.textContent = '☰';
+      });
+    });
   }
 
   galleryPrev = () => {
