@@ -93,6 +93,7 @@
     /* Collapse writing preview list — stack date above title, hide readtime */
     #writing a[data-reveal] { grid-template-columns: 1fr !important; gap: 2px !important; padding: 12px 6px !important; }
     #writing a[data-reveal] > span:last-child { display: none; }
+    #writing a[data-reveal] > span:nth-child(2) { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
   }
   @media (prefers-reduced-motion: no-preference) {
     [data-motion="ready"] [data-reveal] {
