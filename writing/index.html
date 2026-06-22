@@ -29,6 +29,7 @@
     #wl-content { padding: 24px 14px 60px !important; }
     .post-row { grid-template-columns: 1fr !important; gap: 2px !important; padding: 12px 6px !important; }
     .post-row > span:last-child { display: none; }
+    .post-row > span:nth-child(2) { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
   }
 </style>
 </head>
@@ -69,7 +70,7 @@
 </div>
 
 <script>
-const POSTS = [{"slug":"nextcloud-tailscale","title":"Self-hosting Nextcloud behind Tailscale","date":"2026 · 03","tag":"notes","readtime":"6 min","href":"/writing/nextcloud-tailscale.html","excerpt":"How I set up Nextcloud on Ubuntu behind a Tailscale VPN — covering Docker networking, SSL termination via Apache, and the config quirks that took me a few evenings to figure out."},{"slug":"profiling-tau-perf","title":"Profiling parallel apps with TAU & perf","date":"2026 · 01","tag":"writing","readtime":"9 min","href":"/writing/profiling-tau-perf.html","excerpt":"Notes from profiling a parallel C++ application using TAU for high-level traces and Linux perf for hardware counter data — how to find where time is actually spent, and how to visualise it."},{"slug":"docker-homelab","title":"My Docker homelab, container by container","date":"2025 · 11","tag":"cheatsheet","readtime":"5 min","href":"/writing/docker-homelab.html","excerpt":"A rundown of every container I run on my home server — what each one does, why I chose it, and the config decisions I'd make differently next time."}];
+const POSTS = [{"slug":"thesis","title":"A Topic To Be Found","date":"2026 · 06","tag":"writing","readtime":"2 min","href":"/writing/thesis.html","excerpt":"On the process of finding a thesis topic — and why there's less left to discover than you'd expect."},{"slug":"nextcloud-tailscale","title":"Self-hosting Nextcloud behind Tailscale","date":"2026 · 03","tag":"notes","readtime":"6 min","href":"/writing/nextcloud-tailscale.html","excerpt":"How I set up Nextcloud on Ubuntu behind a Tailscale VPN — covering Docker networking, SSL termination via Apache, and the config quirks that took me a few evenings to figure out."},{"slug":"profiling-tau-perf","title":"Profiling parallel apps with TAU & perf","date":"2026 · 01","tag":"writing","readtime":"9 min","href":"/writing/profiling-tau-perf.html","excerpt":"Notes from profiling a parallel C++ application using TAU for high-level traces and Linux perf for hardware counter data — how to find where time is actually spent, and how to visualise it."},{"slug":"docker-homelab","title":"My Docker homelab, container by container","date":"2025 · 11","tag":"cheatsheet","readtime":"5 min","href":"/writing/docker-homelab.html","excerpt":"A rundown of every container I run on my home server — what each one does, why I chose it, and the config decisions I'd make differently next time."}];
 
 function renderPosts(list) {
   const el = document.getElementById('post-list');

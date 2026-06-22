@@ -1,5 +1,14 @@
 [
   {
+    "slug": "thesis",
+    "title": "A Topic To Be Found",
+    "date": "2026 · 06",
+    "tag": "writing",
+    "readtime": "2 min",
+    "href": "/writing/thesis.html",
+    "excerpt": "On the process of finding a thesis topic — and why there's less left to discover than you'd expect."
+  },
+  {
     "slug": "nextcloud-tailscale",
     "title": "Self-hosting Nextcloud behind Tailscale",
     "date": "2026 · 03",

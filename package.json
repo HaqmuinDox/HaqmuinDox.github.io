@@ -2,10 +2,15 @@
   "name": "dancardoz-site",
   "private": true,
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "screenshot": "node scripts/screenshot.js",
+    "screenshot:setup": "playwright install chromium"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
     "marked": "^9.1.6"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.0"
   }
 }
