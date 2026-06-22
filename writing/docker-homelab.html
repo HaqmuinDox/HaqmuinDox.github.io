@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Docker homelab, container by container — dan.cardoz</title>
+<meta name="description" content="A rundown of every container I run on my home server — what each one does, why I chose it, and the config decisions I'd make differently next time.">
+<script>(function(){var t;try{t=localStorage.getItem('dc-theme')}catch(e){}if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}if(t==='light')document.documentElement.setAttribute('data-theme','light')})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/tokens.css">
+<link id="hljs-dark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { margin: 0; padding: 0; font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: var(--txt); min-height: 100vh; }
+
+  @keyframes pulseDot { 0%,100%{box-shadow:0 0 0 0 rgba(102,179,255,.55)} 65%{box-shadow:0 0 0 7px rgba(102,179,255,0)} }
+
+  /* ── Article layout ── */
+  .article-grid {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 52px;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 48px 48px 120px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .article-grid { grid-template-columns: 1fr; padding: 36px 28px 100px; }
+    .toc-aside    { display: none; }
+  }
+  @media (max-width: 560px) {
+    .article-grid { padding: 28px 20px 80px; }
+  }
+
+  /* ── ToC sidebar ── */
+  .toc-aside {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+  .toc-label {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--txt3);
+    margin: 0 0 10px;
+  }
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--section-border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-list li { padding-left: 12px; }
+  .toc-h3      { padding-left: 22px; }
+  .toc-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.65rem;
+    color: var(--txt3);
+    text-decoration: none;
+    line-height: 1.8;
+    display: block;
+    transition: color .18s;
+  }
+  .toc-link:hover,
+  .toc-link.toc-active { color: var(--accent); }
+  .toc-link.toc-active { border-left: 2px solid var(--accent); margin-left: -13px; padding-left: 11px; }
+
+  /* ── Article meta header ── */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .article-tag {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    color: var(--accent);
+    background: var(--skill-bg);
+    border: 0.5px solid var(--skill-border);
+    border-radius: 3px;
+    padding: 2px 8px;
+  }
+  .article-date, .article-readtime {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.68rem;
+    color: var(--txt3);
+  }
+  .article-title {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: clamp(1.3rem, 3vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    color: var(--txt);
+    margin: 0 0 36px;
+  }
+
+  /* ── Prose body ── */
+  .prose { max-width: 72ch; }
+  .prose h2 {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--txt);
+    margin: 2.8rem 0 1rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--section-border);
+  }
+  .prose h3 {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--txt);
+    margin: 2rem 0 0.7rem;
+  }
+  .prose p  { font-size: 1rem; line-height: 1.78; color: var(--txt2); margin: 0 0 1.2rem; }
+  .prose a  { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .prose ul, .prose ol { padding-left: 1.5rem; margin: 0 0 1.2rem; color: var(--txt2); }
+  .prose li { line-height: 1.72; margin-bottom: 0.35rem; }
+  .prose blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--txt3);
+    font-style: italic;
+    margin: 1.5rem 0;
+  }
+  .prose pre {
+    background: var(--card-bg);
+    border: 0.5px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  .prose pre code { background: none; border: none; padding: 0; font-size: inherit; }
+  .prose code {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.83em;
+    background: var(--skill-bg);
+    border: 0.5px solid var(--skill-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .prose hr { border: none; border-top: 1px solid var(--section-border); margin: 2rem 0; }
+  .prose strong { color: var(--txt); font-weight: 600; }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--section-border);
+  }
+  .pag-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--txt3);
+    text-decoration: none;
+    transition: color .18s;
+    max-width: 45%;
+    line-height: 1.5;
+  }
+  .pag-link:hover  { color: var(--accent); }
+  .pag-next { text-align: right; margin-left: auto; }
+
+  /* ── Back link ── */
+  .back-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--txt3);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 28px;
+    transition: color .18s;
+  }
+  .back-link:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- DOT GRID -->
+<div aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,color-mix(in oklab,var(--txt) 7%,transparent) 1px,transparent 1px);background-size:28px 28px;"></div>
+
+<!-- SCROLL PROGRESS BAR -->
+<div id="prog" aria-hidden="true" style="position:fixed;top:0;left:0;z-index:100;height:2px;width:0%;background:linear-gradient(90deg,var(--accent),color-mix(in oklab,var(--accent) 60%,#fff));pointer-events:none;transition:width .1s linear;"></div>
+
+<!-- PAGE BG LAYER -->
+<div aria-hidden="true" style="position:fixed;inset:0;z-index:-1;background:var(--page-bg);transition:background .45s ease;pointer-events:none;"></div>
+
+<!-- TOPBAR -->
+<header style="position:sticky;top:0;z-index:40;border-bottom:1px solid var(--section-border);background:color-mix(in oklab,var(--page-bg) 80%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+  <div style="max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+    <a href="/" style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.86rem;letter-spacing:.06em;color:var(--txt);text-decoration:none;display:inline-flex;align-items:center;gap:9px;flex:none;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--accent);animation:pulseDot 2.8s ease-in-out infinite;"></span>
+      dan.cardoz
+    </a>
+    <nav style="display:flex;align-items:center;gap:22px;">
+      <a href="/#projects" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">Projects</a>
+      <a href="/writing/"  style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--accent);text-decoration:none;">Writing</a>
+      <a href="https://nextcloud.home.dancardoz.de" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">Cloud ↗</a>
+      <button id="theme-btn" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;"></button>
+    </nav>
+  </div>
+</header>
+
+<!-- ARTICLE -->
+<div class="article-grid">
+
+  <!-- CENTER: article content -->
+  <article>
+    <div class="article-meta">
+      <span class="article-date">2025 · 11</span>
+      <span class="article-tag">cheatsheet</span>
+      <span class="article-readtime">5 min read</span>
+    </div>
+    <h1 class="article-title">My Docker homelab, container by container</h1>
+
+    <div class="prose">
+      <p>I run a private cloud on a mini PC in my flat. It&#39;s on 24/7, costs almost nothing to run, and handles files, passwords, automation, and location tracking without any data leaving my network (unless I choose to). This is a snapshot of what&#39;s running and why.</p>
+<h2 id="the-stack-at-a-glance">The stack at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Nextcloud</td>
+<td>Files, contacts, calendars</td>
+</tr>
+<tr>
+<td>Vaultwarden</td>
+<td>Password manager</td>
+</tr>
+<tr>
+<td>n8n</td>
+<td>Workflow automation</td>
+</tr>
+<tr>
+<td>Mosquitto</td>
+<td>MQTT broker</td>
+</tr>
+<tr>
+<td>Dawarich</td>
+<td>Location history</td>
+</tr>
+</tbody></table>
+<p>All containers sit behind a Tailscale VPN. The host runs Ubuntu 22.04 with Apache2 as the reverse proxy for internal HTTPS.</p>
+<h2 id="nextcloud">Nextcloud</h2>
+<p>The centrepiece. I use it for file sync across my laptop and phone, CalDAV/CardDAV for contacts and calendars, and Nextcloud Notes as a simple scratchpad.</p>
+<p><strong>What I&#39;d do differently</strong>: I installed it with the standard Docker image and a MariaDB container. Next time I&#39;d use the all-in-one (AIO) image — it bundles a working TURN server, onlyoffice, and automatic backups, which I&#39;ve since had to set up manually.</p>
+<p><strong>Key config</strong>: Set <code>overwriteprotocol: https</code> and <code>overwritehost</code> in <code>config.php</code> to avoid WebDAV sync clients getting confused by HTTP/HTTPS mismatches behind the proxy.</p>
+<h2 id="vaultwarden">Vaultwarden</h2>
+<p>An unofficial Bitwarden server implementation in Rust. Lighter than the official server (which requires .NET and a SQL Server), and compatible with all the Bitwarden clients.</p>
+<pre><code class="language-yaml">services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    restart: unless-stopped
+    environment:
+      - DOMAIN=https://vault.home.dancardoz.de
+      - SIGNUPS_ALLOWED=false
+    volumes:
+      - vw_data:/data
+</code></pre>
+<p><code>SIGNUPS_ALLOWED=false</code> is important once you&#39;ve created your account. Otherwise anyone who can reach the server can create an account.</p>
+<p><strong>What I&#39;d do differently</strong>: Nothing, actually. Vaultwarden has been rock-solid and the Bitwarden clients work identically. The only friction was the initial DNS-01 certificate for a private domain.</p>
+<h2 id="n8n">n8n</h2>
+<p>A self-hosted workflow automation tool — think Zapier, but running locally. I use it for small automations: sending myself a notification when something changes on a website I&#39;m watching, processing MQTT messages from a temperature sensor, moving files on a schedule.</p>
+<p>n8n has a visual editor (a DAG of nodes) and can call any HTTP endpoint, which makes it useful for connecting services that don&#39;t have direct integrations.</p>
+<pre><code class="language-yaml">  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=n8n.home.dancardoz.de
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.home.dancardoz.de/
+    volumes:
+      - n8n_data:/home/node/.n8n
+</code></pre>
+<p><strong>What I&#39;d do differently</strong>: n8n&#39;s workflow storage format changed between versions in a way that made manual backups hard to restore. I now run automated exports via n8n itself (yes, a workflow that backs up other workflows) on a nightly schedule.</p>
+<h2 id="mosquitto">Mosquitto</h2>
+<p>A lightweight MQTT broker. I have a temperature/humidity sensor that publishes to it, and n8n subscribes to process the readings.</p>
+<pre><code class="language-bash"># mosquitto.conf
+listener 1883 0.0.0.0
+allow_anonymous false
+password_file /mosquitto/config/passwd
+</code></pre>
+<p>MQTT traffic stays inside the Tailscale network. The broker is simple enough that there&#39;s not much to configure beyond basic authentication.</p>
+<h2 id="dawarich">Dawarich</h2>
+<p>Dawarich is a self-hosted alternative to Google Maps Timeline. It ingests location data from your phone (via Overland or the Dawarich app) and plots your movement history on a map — privately.</p>
+<p>The stack is heavier than the others: it requires PostgreSQL with the PostGIS extension and Redis.</p>
+<pre><code class="language-yaml">  dawarich_app:
+    image: freikin/dawarich:latest
+    depends_on:
+      - dawarich_db
+      - dawarich_redis
+
+  dawarich_db:
+    image: postgis/postgis:16-3.4-alpine
+
+  dawarich_redis:
+    image: redis:7-alpine
+</code></pre>
+<p><strong>What I&#39;d do differently</strong>: Dawarich is still early-stage software and has had some database migration issues between releases. I&#39;d set up automated Postgres backups before running it in production, which I didn&#39;t do initially and regretted during an upgrade.</p>
+<h2 id="networking-and-tailscale">Networking and Tailscale</h2>
+<p>Every service is bound to the internal Docker network and exposed to Apache via <code>localhost:PORT</code>. Apache handles TLS termination and proxies to the right container based on the <code>ServerName</code>.</p>
+<p>Tailscale handles access control. The mini PC is a Tailscale exit node for my phone when I&#39;m on untrusted networks, and all the self-hosted services are reachable by name because of Tailscale&#39;s MagicDNS.</p>
+<pre><code class="language-bash"># Check which tailscale devices can reach the server
+tailscale status
+</code></pre>
+<p>No ports are forwarded on my router. The attack surface for everything here is: Tailscale&#39;s auth layer.</p>
+<h2 id="backup-strategy">Backup strategy</h2>
+<p>A cron job runs nightly and:</p>
+<ol>
+<li>Dumps each database to a compressed SQL file</li>
+<li>Rsyncs the dumps + Docker volumes to an external USB drive</li>
+<li>Uploads a copy to a remote location (Nextcloud on a friend&#39;s server)</li>
+</ol>
+<p>The <code>3-2-1</code> rule: 3 copies, 2 media types, 1 offsite. I&#39;m at <code>3-2-1</code> for the databases and <code>2-1-1</code> for the file volumes. Good enough for personal data.</p>
+
+    </div>
+
+    <nav class="pagination" aria-label="Article navigation">
+      
+      <a href="/writing/profiling-tau-perf.html"  class="pag-link pag-next">Profiling parallel apps with TAU & perf →</a>
+    </nav>
+
+    <a href="/writing/" class="back-link">← All writing</a>
+  </article>
+
+  <!-- RIGHT: sticky ToC -->
+  <aside class="toc-aside">
+    <p class="toc-label">On this page</p>
+    <ul class="toc-list"><li><a href="#the-stack-at-a-glance" class="toc-link">The stack at a glance</a></li><li><a href="#nextcloud" class="toc-link">Nextcloud</a></li><li><a href="#vaultwarden" class="toc-link">Vaultwarden</a></li><li><a href="#n8n" class="toc-link">n8n</a></li><li><a href="#mosquitto" class="toc-link">Mosquitto</a></li><li><a href="#dawarich" class="toc-link">Dawarich</a></li><li><a href="#networking-and-tailscale" class="toc-link">Networking and Tailscale</a></li><li><a href="#backup-strategy" class="toc-link">Backup strategy</a></li></ul>
+  </aside>
+
+</div>
+
+<script>
+// Theme + highlight.js + ToC + scroll progress
+(function () {
+  // Theme
+  function getTheme() {
+    var t; try { t = localStorage.getItem('dc-theme'); } catch(e) {}
+    return t || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = t === 'light' ? '☾ Dark' : '☀ Light';
+    // Swap highlight.js stylesheet
+    var dark  = document.getElementById('hljs-dark');
+    var light = document.getElementById('hljs-light');
+    if (dark && light) {
+      dark.disabled  = (t === 'light');
+      light.disabled = (t !== 'light');
+    }
+  }
+
+  applyTheme(getTheme());
+
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('dc-theme', next); } catch(e) {}
+    applyTheme(next);
+  });
+
+  // Syntax highlighting
+  if (typeof hljs !== 'undefined') hljs.highlightAll();
+
+  // Scroll progress
+  window.addEventListener('scroll', function () {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    document.getElementById('prog').style.width = (pct * 100) + '%';
+  }, { passive: true });
+
+  // ToC active section
+  var headings = document.querySelectorAll('article h2[id], article h3[id]');
+  var tocLinks = document.querySelectorAll('.toc-link');
+  if (headings.length && tocLinks.length) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var id   = entry.target.getAttribute('id');
+        var link = document.querySelector('.toc-link[href="#' + id + '"]');
+        if (link) link.classList.toggle('toc-active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+    headings.forEach(function (h) { obs.observe(h); });
+  }
+})();
+</script>
+</body>
+</html>

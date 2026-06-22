@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-hosting Nextcloud behind Tailscale — dan.cardoz</title>
+<meta name="description" content="How I set up Nextcloud on Ubuntu behind a Tailscale VPN — covering Docker networking, SSL termination via Apache, and the config quirks that took me a few evenings to figure out.">
+<script>(function(){var t;try{t=localStorage.getItem('dc-theme')}catch(e){}if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}if(t==='light')document.documentElement.setAttribute('data-theme','light')})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/tokens.css">
+<link id="hljs-dark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { margin: 0; padding: 0; font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: var(--txt); min-height: 100vh; }
+
+  @keyframes pulseDot { 0%,100%{box-shadow:0 0 0 0 rgba(102,179,255,.55)} 65%{box-shadow:0 0 0 7px rgba(102,179,255,0)} }
+
+  /* ── Article layout ── */
+  .article-grid {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 52px;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 48px 48px 120px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .article-grid { grid-template-columns: 1fr; padding: 36px 28px 100px; }
+    .toc-aside    { display: none; }
+  }
+  @media (max-width: 560px) {
+    .article-grid { padding: 28px 20px 80px; }
+  }
+
+  /* ── ToC sidebar ── */
+  .toc-aside {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+  .toc-label {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--txt3);
+    margin: 0 0 10px;
+  }
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--section-border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-list li { padding-left: 12px; }
+  .toc-h3      { padding-left: 22px; }
+  .toc-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.65rem;
+    color: var(--txt3);
+    text-decoration: none;
+    line-height: 1.8;
+    display: block;
+    transition: color .18s;
+  }
+  .toc-link:hover,
+  .toc-link.toc-active { color: var(--accent); }
+  .toc-link.toc-active { border-left: 2px solid var(--accent); margin-left: -13px; padding-left: 11px; }
+
+  /* ── Article meta header ── */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .article-tag {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    color: var(--accent);
+    background: var(--skill-bg);
+    border: 0.5px solid var(--skill-border);
+    border-radius: 3px;
+    padding: 2px 8px;
+  }
+  .article-date, .article-readtime {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.68rem;
+    color: var(--txt3);
+  }
+  .article-title {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: clamp(1.3rem, 3vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    color: var(--txt);
+    margin: 0 0 36px;
+  }
+
+  /* ── Prose body ── */
+  .prose { max-width: 72ch; }
+  .prose h2 {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--txt);
+    margin: 2.8rem 0 1rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--section-border);
+  }
+  .prose h3 {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--txt);
+    margin: 2rem 0 0.7rem;
+  }
+  .prose p  { font-size: 1rem; line-height: 1.78; color: var(--txt2); margin: 0 0 1.2rem; }
+  .prose a  { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .prose ul, .prose ol { padding-left: 1.5rem; margin: 0 0 1.2rem; color: var(--txt2); }
+  .prose li { line-height: 1.72; margin-bottom: 0.35rem; }
+  .prose blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--txt3);
+    font-style: italic;
+    margin: 1.5rem 0;
+  }
+  .prose pre {
+    background: var(--card-bg);
+    border: 0.5px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  .prose pre code { background: none; border: none; padding: 0; font-size: inherit; }
+  .prose code {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.83em;
+    background: var(--skill-bg);
+    border: 0.5px solid var(--skill-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .prose hr { border: none; border-top: 1px solid var(--section-border); margin: 2rem 0; }
+  .prose strong { color: var(--txt); font-weight: 600; }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--section-border);
+  }
+  .pag-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--txt3);
+    text-decoration: none;
+    transition: color .18s;
+    max-width: 45%;
+    line-height: 1.5;
+  }
+  .pag-link:hover  { color: var(--accent); }
+  .pag-next { text-align: right; margin-left: auto; }
+
+  /* ── Back link ── */
+  .back-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--txt3);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 28px;
+    transition: color .18s;
+  }
+  .back-link:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- DOT GRID -->
+<div aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,color-mix(in oklab,var(--txt) 7%,transparent) 1px,transparent 1px);background-size:28px 28px;"></div>
+
+<!-- SCROLL PROGRESS BAR -->
+<div id="prog" aria-hidden="true" style="position:fixed;top:0;left:0;z-index:100;height:2px;width:0%;background:linear-gradient(90deg,var(--accent),color-mix(in oklab,var(--accent) 60%,#fff));pointer-events:none;transition:width .1s linear;"></div>
+
+<!-- PAGE BG LAYER -->
+<div aria-hidden="true" style="position:fixed;inset:0;z-index:-1;background:var(--page-bg);transition:background .45s ease;pointer-events:none;"></div>
+
+<!-- TOPBAR -->
+<header style="position:sticky;top:0;z-index:40;border-bottom:1px solid var(--section-border);background:color-mix(in oklab,var(--page-bg) 80%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+  <div style="max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+    <a href="/" style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.86rem;letter-spacing:.06em;color:var(--txt);text-decoration:none;display:inline-flex;align-items:center;gap:9px;flex:none;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--accent);animation:pulseDot 2.8s ease-in-out infinite;"></span>
+      dan.cardoz
+    </a>
+    <nav style="display:flex;align-items:center;gap:22px;">
+      <a href="/#projects" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">Projects</a>
+      <a href="/writing/"  style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--accent);text-decoration:none;">Writing</a>
+      <a href="https://nextcloud.home.dancardoz.de" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">Cloud ↗</a>
+      <button id="theme-btn" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;"></button>
+    </nav>
+  </div>
+</header>
+
+<!-- ARTICLE -->
+<div class="article-grid">
+
+  <!-- CENTER: article content -->
+  <article>
+    <div class="article-meta">
+      <span class="article-date">2026 · 03</span>
+      <span class="article-tag">notes</span>
+      <span class="article-readtime">6 min read</span>
+    </div>
+    <h1 class="article-title">Self-hosting Nextcloud behind Tailscale</h1>
+
+    <div class="prose">
+      <p>Running your own cloud sounds like a weekend project. In my case it turned into a proper infrastructure — Nextcloud, Vaultwarden, n8n, Dawarich, and a few more containers, all restricted to a Tailscale mesh so they&#39;re never exposed to the open internet. This post covers the Nextcloud piece specifically: getting it running reliably behind Tailscale with SSL from Let&#39;s Encrypt.</p>
+<h2 id="why-tailscale-instead-of-a-public-reverse-proxy">Why Tailscale instead of a public reverse proxy</h2>
+<p>The tempting path is to put Nginx or Caddy on a VPS, forward traffic, and get automatic HTTPS. I tried that. The problem: your files and your password manager are accessible to anyone who can reach that IP. Even with strong passwords, you&#39;re one misconfigured firewall rule away from trouble.</p>
+<p>Tailscale solves this by making your services reachable only to devices enrolled in your tailnet. No public IP, no open ports. The tradeoff: you can&#39;t share links with people outside your tailnet, which is fine for a personal setup.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Ubuntu server (I run 22.04 on a repurposed mini PC)</li>
+<li>Docker and Docker Compose installed</li>
+<li>Tailscale installed and authenticated on the server</li>
+<li>A domain name (I use <code>nextcloud.home.dancardoz.de</code>) with DNS pointing to your Tailscale IP</li>
+</ul>
+<h3 id="get-your-tailscale-ip">Get your Tailscale IP</h3>
+<pre><code class="language-bash">tailscale ip -4
+# → 100.x.x.x
+</code></pre>
+<p>Add an A record in your DNS provider pointing <code>nextcloud.home.dancardoz.de</code> to that IP. Because this is a private IP, only devices in your tailnet will be able to resolve it to something reachable.</p>
+<h2 id="docker-compose-setup">Docker Compose setup</h2>
+<pre><code class="language-yaml">version: &quot;3.9&quot;
+services:
+  nextcloud:
+    image: nextcloud:28
+    restart: unless-stopped
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${NC_DB_PASSWORD}
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.home.dancardoz.de
+    volumes:
+      - nextcloud_data:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${NC_DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  nextcloud_data:
+  db_data:
+</code></pre>
+<p>Note: <code>NEXTCLOUD_TRUSTED_DOMAINS</code> must exactly match the hostname you&#39;ll use. Nextcloud blocks requests from unrecognised hosts — this caught me off guard the first time.</p>
+<h2 id="ssl-with-apache-and-let-39-s-encrypt">SSL with Apache and Let&#39;s Encrypt</h2>
+<p>Nextcloud recommends Apache as the reverse proxy. Install it and enable the required modules:</p>
+<pre><code class="language-bash">sudo apt install apache2
+sudo a2enmod proxy proxy_http ssl rewrite headers
+</code></pre>
+<p>Then add a virtual host:</p>
+<pre><code class="language-apache">&lt;VirtualHost *:443&gt;
+  ServerName nextcloud.home.dancardoz.de
+
+  SSLEngine on
+  SSLCertificateFile    /etc/letsencrypt/live/nextcloud.home.dancardoz.de/fullchain.pem
+  SSLCertificateKeyFile /etc/letsencrypt/live/nextcloud.home.dancardoz.de/privkey.pem
+
+  ProxyPass        / http://localhost:8080/
+  ProxyPassReverse / http://localhost:8080/
+
+  RequestHeader set X-Forwarded-Proto &quot;https&quot;
+  RequestHeader set X-Forwarded-Port  &quot;443&quot;
+&lt;/VirtualHost&gt;
+</code></pre>
+<h3 id="certbot-with-tailscale">Certbot with Tailscale</h3>
+<p>Here&#39;s the non-obvious part: Certbot&#39;s HTTP-01 challenge requires a publicly reachable server, but yours isn&#39;t public. Use the DNS-01 challenge instead — it proves domain ownership through a TXT record, not an HTTP endpoint.</p>
+<pre><code class="language-bash">sudo apt install certbot python3-certbot-dns-&lt;your-provider&gt;
+sudo certbot certonly \
+  --dns-&lt;your-provider&gt; \
+  -d nextcloud.home.dancardoz.de
+</code></pre>
+<p>Replace <code>&lt;your-provider&gt;</code> with your DNS provider&#39;s plugin (e.g. <code>cloudflare</code>, <code>namecheap</code>). You&#39;ll need an API token with permission to add TXT records.</p>
+<h2 id="nextcloud-config-tweaks">Nextcloud config tweaks</h2>
+<p>After the first login, Nextcloud will likely warn about a few missing config values. Edit <code>/path/to/nextcloud/config/config.php</code>:</p>
+<pre><code class="language-php">&#39;overwriteprotocol&#39; =&gt; &#39;https&#39;,
+&#39;overwritehost&#39;     =&gt; &#39;nextcloud.home.dancardoz.de&#39;,
+&#39;trusted_proxies&#39;   =&gt; [&#39;127.0.0.1&#39;],
+</code></pre>
+<p>Without <code>overwriteprotocol</code>, Nextcloud generates <code>http://</code> URLs for WebDAV and caldav even when your clients are connecting over HTTPS — sync clients will fail silently.</p>
+<h2 id="background-jobs">Background jobs</h2>
+<p>Nextcloud&#39;s background jobs (thumbnail generation, activity cleanup, etc.) default to AJAX mode, which only runs when someone has the web UI open. Set them to cron:</p>
+<pre><code class="language-bash"># On the host, not inside the container
+* * * * * docker exec nextcloud_nextcloud_1 \
+  php -f /var/www/html/cron.php
+</code></pre>
+<p>The container name depends on your Compose project name. Check with <code>docker ps</code>.</p>
+<h2 id="result">Result</h2>
+<p>After all this: Nextcloud is accessible from any device in my tailnet, syncing contacts, calendars, and files. The private IP means it never appears in any internet scan. Certbot renews the certificate automatically via a systemd timer.</p>
+<p>Total monthly cost: electricity for the mini PC and the domain name.</p>
+
+    </div>
+
+    <nav class="pagination" aria-label="Article navigation">
+      <a href="/writing/profiling-tau-perf.html"  class="pag-link pag-prev">← Profiling parallel apps with TAU & perf</a>
+      
+    </nav>
+
+    <a href="/writing/" class="back-link">← All writing</a>
+  </article>
+
+  <!-- RIGHT: sticky ToC -->
+  <aside class="toc-aside">
+    <p class="toc-label">On this page</p>
+    <ul class="toc-list"><li><a href="#why-tailscale-instead-of-a-public-reverse-proxy" class="toc-link">Why Tailscale instead of a public reverse proxy</a></li><li><a href="#prerequisites" class="toc-link">Prerequisites</a></li><li class="toc-h3"><a href="#get-your-tailscale-ip" class="toc-link">Get your Tailscale IP</a></li><li><a href="#docker-compose-setup" class="toc-link">Docker Compose setup</a></li><li><a href="#ssl-with-apache-and-let-39-s-encrypt" class="toc-link">SSL with Apache and Let&#39;s Encrypt</a></li><li class="toc-h3"><a href="#certbot-with-tailscale" class="toc-link">Certbot with Tailscale</a></li><li><a href="#nextcloud-config-tweaks" class="toc-link">Nextcloud config tweaks</a></li><li><a href="#background-jobs" class="toc-link">Background jobs</a></li><li><a href="#result" class="toc-link">Result</a></li></ul>
+  </aside>
+
+</div>
+
+<script>
+// Theme + highlight.js + ToC + scroll progress
+(function () {
+  // Theme
+  function getTheme() {
+    var t; try { t = localStorage.getItem('dc-theme'); } catch(e) {}
+    return t || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = t === 'light' ? '☾ Dark' : '☀ Light';
+    // Swap highlight.js stylesheet
+    var dark  = document.getElementById('hljs-dark');
+    var light = document.getElementById('hljs-light');
+    if (dark && light) {
+      dark.disabled  = (t === 'light');
+      light.disabled = (t !== 'light');
+    }
+  }
+
+  applyTheme(getTheme());
+
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('dc-theme', next); } catch(e) {}
+    applyTheme(next);
+  });
+
+  // Syntax highlighting
+  if (typeof hljs !== 'undefined') hljs.highlightAll();
+
+  // Scroll progress
+  window.addEventListener('scroll', function () {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    document.getElementById('prog').style.width = (pct * 100) + '%';
+  }, { passive: true });
+
+  // ToC active section
+  var headings = document.querySelectorAll('article h2[id], article h3[id]');
+  var tocLinks = document.querySelectorAll('.toc-link');
+  if (headings.length && tocLinks.length) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var id   = entry.target.getAttribute('id');
+        var link = document.querySelector('.toc-link[href="#' + id + '"]');
+        if (link) link.classList.toggle('toc-active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+    headings.forEach(function (h) { obs.observe(h); });
+  }
+})();
+</script>
+</body>
+</html>

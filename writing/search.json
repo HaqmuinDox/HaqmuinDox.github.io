@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "nextcloud-tailscale",
+    "title": "Self-hosting Nextcloud behind Tailscale",
+    "date": "2026 · 03",
+    "tag": "notes",
+    "readtime": "6 min",
+    "href": "/writing/nextcloud-tailscale.html",
+    "excerpt": "How I set up Nextcloud on Ubuntu behind a Tailscale VPN — covering Docker networking, SSL termination via Apache, and the config quirks that took me a few evenings to figure out."
+  },
+  {
+    "slug": "profiling-tau-perf",
+    "title": "Profiling parallel apps with TAU & perf",
+    "date": "2026 · 01",
+    "tag": "writing",
+    "readtime": "9 min",
+    "href": "/writing/profiling-tau-perf.html",
+    "excerpt": "Notes from profiling a parallel C++ application using TAU for high-level traces and Linux perf for hardware counter data — how to find where time is actually spent, and how to visualise it."
+  },
+  {
+    "slug": "docker-homelab",
+    "title": "My Docker homelab, container by container",
+    "date": "2025 · 11",
+    "tag": "cheatsheet",
+    "readtime": "5 min",
+    "href": "/writing/docker-homelab.html",
+    "excerpt": "A rundown of every container I run on my home server — what each one does, why I chose it, and the config decisions I'd make differently next time."
+  }
+]
