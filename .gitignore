@@ -24,3 +24,8 @@ _site/
 # Claude Code
 CLAUDE.md
 components/
+templates/
+_ds_manifest.json
+_ds_bundle.js
+_adherence.oxlintrc.json
+index.html.bak

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profiling parallel apps with TAU & perf — dan.cardoz</title>
+<meta name="description" content="Notes from profiling a parallel C++ application using TAU for high-level traces and Linux perf for hardware counter data — how to find where time is actually spent, and how to visualise it.">
+<script>(function(){var t;try{t=localStorage.getItem('dc-theme')}catch(e){}if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}if(t==='light')document.documentElement.setAttribute('data-theme','light')})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/tokens.css">
+<link id="hljs-dark"  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" disabled>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { margin: 0; padding: 0; font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: var(--txt); min-height: 100vh; }
+
+  @keyframes pulseDot { 0%,100%{box-shadow:0 0 0 0 rgba(102,179,255,.55)} 65%{box-shadow:0 0 0 7px rgba(102,179,255,0)} }
+
+  /* ── Article layout ── */
+  .article-grid {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 52px;
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 48px 48px 120px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .article-grid { grid-template-columns: 1fr; padding: 36px 28px 100px; }
+    .toc-aside    { display: none; }
+  }
+  @media (max-width: 560px) {
+    .article-grid { padding: 28px 20px 80px; }
+  }
+
+  /* ── ToC sidebar ── */
+  .toc-aside {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+  .toc-label {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--txt3);
+    margin: 0 0 10px;
+  }
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--section-border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-list li { padding-left: 12px; }
+  .toc-h3      { padding-left: 22px; }
+  .toc-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.65rem;
+    color: var(--txt3);
+    text-decoration: none;
+    line-height: 1.8;
+    display: block;
+    transition: color .18s;
+  }
+  .toc-link:hover,
+  .toc-link.toc-active { color: var(--accent); }
+  .toc-link.toc-active { border-left: 2px solid var(--accent); margin-left: -13px; padding-left: 11px; }
+
+  /* ── Article meta header ── */
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .article-tag {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.62rem;
+    color: var(--accent);
+    background: var(--skill-bg);
+    border: 0.5px solid var(--skill-border);
+    border-radius: 3px;
+    padding: 2px 8px;
+  }
+  .article-date, .article-readtime {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.68rem;
+    color: var(--txt3);
+  }
+  .article-title {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: clamp(1.3rem, 3vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    color: var(--txt);
+    margin: 0 0 36px;
+  }
+
+  /* ── Prose body ── */
+  .prose { max-width: 72ch; }
+  .prose h2 {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--txt);
+    margin: 2.8rem 0 1rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--section-border);
+  }
+  .prose h3 {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--txt);
+    margin: 2rem 0 0.7rem;
+  }
+  .prose p  { font-size: 1rem; line-height: 1.78; color: var(--txt2); margin: 0 0 1.2rem; }
+  .prose a  { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .prose ul, .prose ol { padding-left: 1.5rem; margin: 0 0 1.2rem; color: var(--txt2); }
+  .prose li { line-height: 1.72; margin-bottom: 0.35rem; }
+  .prose blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--txt3);
+    font-style: italic;
+    margin: 1.5rem 0;
+  }
+  .prose pre {
+    background: var(--card-bg);
+    border: 0.5px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  .prose pre code { background: none; border: none; padding: 0; font-size: inherit; }
+  .prose code {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.83em;
+    background: var(--skill-bg);
+    border: 0.5px solid var(--skill-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .prose hr { border: none; border-top: 1px solid var(--section-border); margin: 2rem 0; }
+  .prose strong { color: var(--txt); font-weight: 600; }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--section-border);
+  }
+  .pag-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--txt3);
+    text-decoration: none;
+    transition: color .18s;
+    max-width: 45%;
+    line-height: 1.5;
+  }
+  .pag-link:hover  { color: var(--accent); }
+  .pag-next { text-align: right; margin-left: auto; }
+
+  /* ── Back link ── */
+  .back-link {
+    font-family: 'Space Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--txt3);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 28px;
+    transition: color .18s;
+  }
+  .back-link:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- DOT GRID -->
+<div aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle,color-mix(in oklab,var(--txt) 7%,transparent) 1px,transparent 1px);background-size:28px 28px;"></div>
+
+<!-- SCROLL PROGRESS BAR -->
+<div id="prog" aria-hidden="true" style="position:fixed;top:0;left:0;z-index:100;height:2px;width:0%;background:linear-gradient(90deg,var(--accent),color-mix(in oklab,var(--accent) 60%,#fff));pointer-events:none;transition:width .1s linear;"></div>
+
+<!-- PAGE BG LAYER -->
+<div aria-hidden="true" style="position:fixed;inset:0;z-index:-1;background:var(--page-bg);transition:background .45s ease;pointer-events:none;"></div>
+
+<!-- TOPBAR -->
+<header style="position:sticky;top:0;z-index:40;border-bottom:1px solid var(--section-border);background:color-mix(in oklab,var(--page-bg) 80%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+  <div style="max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+    <a href="/" style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.86rem;letter-spacing:.06em;color:var(--txt);text-decoration:none;display:inline-flex;align-items:center;gap:9px;flex:none;">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--accent);animation:pulseDot 2.8s ease-in-out infinite;"></span>
+      dan.cardoz
+    </a>
+    <nav style="display:flex;align-items:center;gap:22px;">
+      <a href="/#projects" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">Projects</a>
+      <a href="/writing/"  style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--accent);text-decoration:none;">Writing</a>
+      <a href="https://nextcloud.home.dancardoz.de" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;">Cloud ↗</a>
+      <button id="theme-btn" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;"></button>
+    </nav>
+  </div>
+</header>
+
+<!-- ARTICLE -->
+<div class="article-grid">
+
+  <!-- CENTER: article content -->
+  <article>
+    <div class="article-meta">
+      <span class="article-date">2026 · 01</span>
+      <span class="article-tag">writing</span>
+      <span class="article-readtime">9 min read</span>
+    </div>
+    <h1 class="article-title">Profiling parallel apps with TAU & perf</h1>
+
+    <div class="prose">
+      <p>When a parallel application runs slower than expected, the first instinct is to guess. The second instinct is to add timers around the bits you already suspect. Both usually lead to the wrong place. This is about the third approach: actually measuring.</p>
+<p>For a university HPC project I had to profile a parallel C++ application, identify runtime bottlenecks, and visualise the results. The toolchain was TAU (Tuning and Analysis Utilities) for high-level instrumentation and Linux <code>perf</code> for hardware counter data. Here&#39;s what I learned.</p>
+<h2 id="what-tau-and-perf-each-give-you">What TAU and perf each give you</h2>
+<p><strong>TAU</strong> instruments your application at the function level. It captures wall-clock time, CPU time, and call counts per function across all MPI ranks or OpenMP threads. The output is a profile database you browse in ParaProf or Vampir. Good for answering: <em>which function is dominating runtime?</em></p>
+<p><strong>Linux <code>perf</code></strong> sits closer to the hardware. It reads CPU performance counters — cache misses, branch mispredictions, instructions per cycle — via the kernel&#39;s <code>perf_events</code> interface. Good for answering: <em>why is that function slow?</em></p>
+<p>The two tools complement each other. TAU tells you where time goes; <code>perf</code> tells you what the hardware is doing there.</p>
+<h2 id="instrumenting-with-tau">Instrumenting with TAU</h2>
+<p>TAU can instrument code at compile time (using the PDT source transformation or a compiler wrapper) or at runtime via sampling. For most cases, the compiler wrapper is easiest:</p>
+<pre><code class="language-bash"># Build with TAU&#39;s MPI+OpenMP compiler wrapper
+tau_cc.sh  -tau_options=&quot;-optShared -optMpi -optOpenMP&quot; myapp.c  -o myapp
+tau_cxx.sh -tau_options=&quot;-optShared -optMpi -optOpenMP&quot; myapp.cpp -o myapp
+</code></pre>
+<p>Set the profiling output directory before running:</p>
+<pre><code class="language-bash">export TAU_PROFILE=1
+export PROFILEDIR=./tau_profiles
+mpirun -np 8 ./myapp
+</code></pre>
+<p>After the run, <code>./tau_profiles/</code> contains one <code>profile.*.*.*</code> file per MPI rank. Load them into ParaProf:</p>
+<pre><code class="language-bash">paraprof tau_profiles/
+</code></pre>
+<h3 id="reading-the-paraprof-flat-profile">Reading the ParaProf flat profile</h3>
+<p>The flat profile sorts functions by exclusive time (time inside the function, not in its callees). Look for functions where:</p>
+<ul>
+<li>Exclusive time is high — the function itself is slow</li>
+<li>Inclusive time &gt;&gt; Exclusive time — the function calls something expensive</li>
+</ul>
+<p>In my case, <code>compute_stencil()</code> appeared near the top with high exclusive time. That&#39;s where <code>perf</code> came in.</p>
+<h2 id="drilling-into-hotspots-with-perf">Drilling into hotspots with perf</h2>
+<p><code>perf stat</code> gives a quick summary of hardware events:</p>
+<pre><code class="language-bash">perf stat -e cache-misses,cache-references,instructions,cycles ./myapp
+</code></pre>
+<p>Example output:</p>
+<pre><code>    1,234,567,890   cache-misses              #   42.3% of all cache refs
+    2,918,371,204   cache-references
+   18,432,000,000   instructions              #    1.23  insn per cycle
+   14,986,432,100   cycles
+</code></pre>
+<p>A 42% cache miss rate is very high. Combined with TAU showing <code>compute_stencil()</code> as the hotspot, the hypothesis was clear: the stencil computation was thrashing the cache.</p>
+<h3 id="perf-record-perf-report">perf record + perf report</h3>
+<p>For function-level attribution:</p>
+<pre><code class="language-bash">perf record -e cache-misses -g ./myapp
+perf report
+</code></pre>
+<p><code>perf report</code> opens an interactive TUI showing which functions contribute most to cache misses. The <code>-g</code> flag enables call-graph capture so you can see the full call stack at each sample.</p>
+<h3 id="annotating-source-with-perf-annotate">Annotating source with perf annotate</h3>
+<p>Once you&#39;ve identified the hot function, <code>perf annotate</code> shows which source lines (or assembly instructions) are responsible:</p>
+<pre><code class="language-bash">perf annotate compute_stencil
+</code></pre>
+<p>This is where you find whether the issue is a strided memory access pattern, a frequently taken branch, or something else.</p>
+<h2 id="visualising-with-python-heatmaps">Visualising with Python heatmaps</h2>
+<p>TAU profiles give per-function exclusive time per MPI rank. To spot load imbalances (one rank doing much more work than others), a heatmap is more readable than a table.</p>
+<pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+
+# Load TAU profile data — simplified example
+# In practice, use the tau_profile_parser or pstats2json
+ranks = 8
+functions = [&#39;compute_stencil&#39;, &#39;mpi_reduce&#39;, &#39;io_write&#39;, &#39;init&#39;]
+data = np.array([
+    [82.3, 4.1, 1.2, 0.3],
+    [79.8, 5.2, 1.1, 0.3],
+    [83.1, 4.0, 1.3, 0.3],
+    [41.2, 3.9, 1.1, 0.3],  # rank 3 is suspiciously fast
+    [81.0, 4.3, 1.2, 0.3],
+    [80.5, 4.1, 1.4, 0.3],
+    [82.7, 3.8, 1.1, 0.3],
+    [83.4, 4.2, 1.3, 0.3],
+])
+
+fig, ax = plt.subplots(figsize=(8, 5))
+im = ax.imshow(data, aspect=&#39;auto&#39;, cmap=&#39;hot_r&#39;)
+ax.set_xticks(range(len(functions)))
+ax.set_xticklabels(functions, rotation=30, ha=&#39;right&#39;)
+ax.set_ylabel(&#39;MPI Rank&#39;)
+ax.set_title(&#39;Exclusive time (s) by function and rank&#39;)
+fig.colorbar(im, ax=ax, label=&#39;Seconds&#39;)
+plt.tight_layout()
+plt.savefig(&#39;profile_heatmap.png&#39;, dpi=150)
+</code></pre>
+<p>Rank 3 standing out immediately told us there was a data partition imbalance — one rank received fewer elements and finished early, leaving the others waiting at the <code>MPI_Reduce</code> barrier.</p>
+<h2 id="what-i-changed">What I changed</h2>
+<p>After profiling:</p>
+<ol>
+<li><strong>Loop reordering</strong> in <code>compute_stencil()</code> — changed from row-major to column-major iteration to match memory layout. Cache miss rate dropped from 42% to 8%.</li>
+<li><strong>Static load balancing</strong> — the partitioner was dividing elements by index without accounting for non-uniform element sizes. Switching to size-aware partitioning eliminated the rank 3 anomaly.</li>
+</ol>
+<p>Runtime dropped by ~34% with both changes applied.</p>
+<h2 id="takeaways">Takeaways</h2>
+<ul>
+<li>Profile before optimising. Every time I&#39;ve guessed at hotspots without measuring, I&#39;ve been wrong at least once.</li>
+<li>TAU + perf is a good division of labour: TAU for the application-level view, <code>perf</code> for the hardware-level explanation.</li>
+<li>The heatmap is a surprisingly effective presentation tool — one image showed the load imbalance more clearly than any table could.</li>
+</ul>
+
+    </div>
+
+    <nav class="pagination" aria-label="Article navigation">
+      <a href="/writing/docker-homelab.html"  class="pag-link pag-prev">← My Docker homelab, container by container</a>
+      <a href="/writing/nextcloud-tailscale.html"  class="pag-link pag-next">Self-hosting Nextcloud behind Tailscale →</a>
+    </nav>
+
+    <a href="/writing/" class="back-link">← All writing</a>
+  </article>
+
+  <!-- RIGHT: sticky ToC -->
+  <aside class="toc-aside">
+    <p class="toc-label">On this page</p>
+    <ul class="toc-list"><li><a href="#what-tau-and-perf-each-give-you" class="toc-link">What TAU and perf each give you</a></li><li><a href="#instrumenting-with-tau" class="toc-link">Instrumenting with TAU</a></li><li class="toc-h3"><a href="#reading-the-paraprof-flat-profile" class="toc-link">Reading the ParaProf flat profile</a></li><li><a href="#drilling-into-hotspots-with-perf" class="toc-link">Drilling into hotspots with perf</a></li><li class="toc-h3"><a href="#perf-record-perf-report" class="toc-link">perf record + perf report</a></li><li class="toc-h3"><a href="#annotating-source-with-perf-annotate" class="toc-link">Annotating source with perf annotate</a></li><li><a href="#visualising-with-python-heatmaps" class="toc-link">Visualising with Python heatmaps</a></li><li><a href="#what-i-changed" class="toc-link">What I changed</a></li><li><a href="#takeaways" class="toc-link">Takeaways</a></li></ul>
+  </aside>
+
+</div>
+
+<script>
+// Theme + highlight.js + ToC + scroll progress
+(function () {
+  // Theme
+  function getTheme() {
+    var t; try { t = localStorage.getItem('dc-theme'); } catch(e) {}
+    return t || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = t === 'light' ? '☾ Dark' : '☀ Light';
+    // Swap highlight.js stylesheet
+    var dark  = document.getElementById('hljs-dark');
+    var light = document.getElementById('hljs-light');
+    if (dark && light) {
+      dark.disabled  = (t === 'light');
+      light.disabled = (t !== 'light');
+    }
+  }
+
+  applyTheme(getTheme());
+
+  document.getElementById('theme-btn').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('dc-theme', next); } catch(e) {}
+    applyTheme(next);
+  });
+
+  // Syntax highlighting
+  if (typeof hljs !== 'undefined') hljs.highlightAll();
+
+  // Scroll progress
+  window.addEventListener('scroll', function () {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    document.getElementById('prog').style.width = (pct * 100) + '%';
+  }, { passive: true });
+
+  // ToC active section
+  var headings = document.querySelectorAll('article h2[id], article h3[id]');
+  var tocLinks = document.querySelectorAll('.toc-link');
+  if (headings.length && tocLinks.length) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var id   = entry.target.getAttribute('id');
+        var link = document.querySelector('.toc-link[href="#' + id + '"]');
+        if (link) link.classList.toggle('toc-active', entry.isIntersecting);
+      });
+    }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+    headings.forEach(function (h) { obs.observe(h); });
+  }
+})();
+</script>
+</body>
+</html>
