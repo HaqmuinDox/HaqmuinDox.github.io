@@ -335,28 +335,6 @@
     <!-- ═══ RIGHT RAIL ═══ -->
     <aside data-rail>
 
-      <!-- SYSTEM STATUS -->
-      <div data-reveal style="border:0.5px solid var(--card-border);border-radius:11px;padding:18px;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;flex:none;animation:pulseDot 2.2s ease-in-out infinite;"></span>
-          <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;font-weight:700;color:var(--txt);letter-spacing:.09em;text-transform:uppercase;">System</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <sc-for list="{{ services }}" as="svc" hint-placeholder-count="5">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-              <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;color:var(--txt2);">{{ svc.name }}</span>
-              <span style="display:inline-flex;align-items:center;gap:4px;font-family:'Space Mono',ui-monospace,monospace;font-size:0.6rem;color:#22c55e;">
-                <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#22c55e;flex:none;"></span>up
-              </span>
-            </div>
-          </sc-for>
-        </div>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--section-border);">
-          <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.6rem;color:var(--txt3);margin:0 0 5px;text-transform:uppercase;letter-spacing:.07em;">Uptime</p>
-          <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.76rem;color:var(--accent);margin:0;">{{ uptimeStr }}</p>
-        </div>
-      </div>
-
       <!-- NOW -->
       <div data-reveal style="border:0.5px solid var(--card-border);border-radius:11px;padding:18px;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;font-weight:700;color:var(--txt);letter-spacing:.09em;text-transform:uppercase;margin:0 0 13px;">Now</p>
@@ -380,7 +358,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#66b3ff&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { theme: 'dark', typedIdx: 0, uptimeStr: '0d 0h 0m 0s' };
+  state = { theme: 'dark', typedIdx: 0 };
   _subs = [];
   obs = null;
   root = null; cursorEl = null; progressEl = null;
@@ -390,7 +368,7 @@ class Component extends DCLogic {
     this.applyRoot();
     this.setupMotion();
     this.startTypewriter();
-    this.startUptime();
+
     this.setupCursor();
     this.setupScroll();
     this.setupCardTilt();
@@ -448,20 +426,7 @@ class Component extends DCLogic {
     this.sub(() => clearTimeout(tid));
   }
 
-  startUptime() {
-    const start = new Date('2024-01-01T00:00:00').getTime();
-    const update = () => {
-      const diff = Date.now() - start;
-      const s = Math.floor(diff / 1000) % 60;
-      const m = Math.floor(diff / 60000) % 60;
-      const h = Math.floor(diff / 3600000) % 24;
-      const d = Math.floor(diff / 86400000);
-      this.setState({ uptimeStr: d + 'd ' + h + 'h ' + m + 'm ' + s + 's' });
-    };
-    update();
-    const iv = setInterval(update, 1000);
-    this.sub(() => clearInterval(iv));
-  }
+
 
   setupCursor() {
     const onMove = (e) => {
@@ -620,7 +585,7 @@ class Component extends DCLogic {
       themeIcon:  this.state.theme === 'light' ? '☾' : '☀',
       themeLabel: this.state.theme === 'light' ? 'Dark' : 'Light',
       typedRole: roleText.slice(0, this.state.typedIdx),
-      uptimeStr: this.state.uptimeStr,
+
 
       cloudHref: 'https://nextcloud.home.dancardoz.de',
       email:     'mailto:contact@dancardoz.de',
@@ -645,10 +610,6 @@ class Component extends DCLogic {
         { label: 'LinkedIn',  href: 'https://www.linkedin.com/in/dan-cardoz-9a2642253/', icon: '/assets/icons/linkedin.svg' },
         { label: 'Instagram', href: 'https://www.instagram.com/dan_cardoz/',             icon: '/assets/icons/instagram.svg' },
         { label: 'X',         href: 'https://x.com/dan_cardoz',                          icon: '/assets/icons/x.svg' }
-      ],
-      services: [
-        { name: 'Nextcloud' }, { name: 'Vaultwarden' },
-        { name: 'n8n' }, { name: 'Tailscale' }, { name: 'Dawarich' }
       ],
       experience: [
         {
