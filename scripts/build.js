@@ -201,6 +201,31 @@ renderPosts(POSTS);
 </html>`;
 }
 
+function updateHomepage(posts) {
+  const indexPath = path.join(ROOT, 'index.html');
+  let html = fs.readFileSync(indexPath, 'utf8');
+
+  const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  const postsLines = posts.map(p =>
+    `        { date: '${esc(p.date)}', title: '${esc(p.title)}', tag: '${esc(p.tag)}', readtime: '${esc(p.readtime)}', href: '${esc(p.href)}' }`
+  ).join(',\n');
+
+  html = html.replace(
+    /posts:\s*\[[\s\S]*?\n\s*\],/,
+    `posts: [\n${postsLines}\n      ],`
+  );
+
+  const latest = posts[0];
+  html = html.replace(
+    /latestPost:\s*\{[^}]*\},/,
+    `latestPost: { date: '${esc(latest.date)}', title: '${esc(latest.title)}', href: '${esc(latest.href)}' },`
+  );
+
+  fs.writeFileSync(indexPath, html, 'utf8');
+  console.log('Updated: index.html');
+}
+
 function main() {
   const files = fs.readdirSync(SRC_DIR).filter(f => f.endsWith('.md'));
   const posts = [];
@@ -260,6 +285,8 @@ function main() {
 
   fs.writeFileSync(path.join(OUT_DIR, 'index.html'), buildIndexPage(searchData), 'utf8');
   console.log('Built: writing/index.html');
+
+  updateHomepage(searchData);
 }
 
 main();
