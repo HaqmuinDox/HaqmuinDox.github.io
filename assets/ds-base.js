@@ -2,7 +2,7 @@
 // base at the bound DS folder relative to this file (e.g. '_ds/<folder>' at
 // the project root, '../_ds/<folder>' one level down) — one line to edit.
 (() => {
-  const base = '.';
+  const base = './assets';
   for (const p of ["tokens.css"]) {
     const l = document.createElement('link');
     l.rel = 'stylesheet'; l.href = base + '/' + p;
