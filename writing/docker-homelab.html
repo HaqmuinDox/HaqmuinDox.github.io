@@ -192,6 +192,22 @@
     transition: color .18s;
   }
   .back-link:hover { color: var(--accent); }
+
+  /* ── Mobile header ── */
+  @media (max-width: 640px) {
+    header > div { padding-left: 16px !important; padding-right: 16px !important; }
+    header nav { gap: 14px !important; }
+  }
+  @media (max-width: 480px) {
+    header nav { gap: 10px !important; }
+    header nav a, header nav button { font-size: 0.65rem !important; }
+    /* Hide Cloud ↗ link to keep header from overflowing on small phones */
+    header nav a:nth-of-type(3) { display: none !important; }
+    /* Larger metadata text on mobile */
+    .article-tag, .article-date, .article-readtime { font-size: 0.7rem; }
+    /* Easier-to-tap pagination */
+    .pag-link { padding: 10px 0; display: block; }
+  }
 </style>
 </head>
 <body>
