@@ -185,19 +185,9 @@
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.95rem;color:var(--accent);margin:0 0 22px;min-height:1.5em;line-height:1.5;">{{ typedRole }}<span style="animation:blink 1s step-end infinite;will-change:opacity;">|</span></p>
         <p style="font-size:1.02rem;line-height:1.7;color:var(--txt2);margin:0 0 28px;">{{ intro }}</p>
 
-        <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:32px;">
+        <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
           <a href="{{ email }}" style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--txt);background:transparent;border:1px solid var(--btn-border);padding:11px 16px;border-radius:7px;text-decoration:none;transition:border-color .2s,color .2s;" style-hover="border-color:var(--accent);color:var(--accent);">✦ Get in touch</a>
         </div>
-
-        <nav style="display:flex;flex-direction:column;gap:12px;margin-bottom:30px;">
-          <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
-            <a href="{{ item.href }}" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--txt3);text-decoration:none;display:flex;align-items:center;gap:10px;transition:color .22s,padding-left .22s;" style-hover="color:var(--accent);padding-left:4px;">
-              <span style="display:inline-block;width:16px;height:1px;background:currentColor;flex:none;"></span>
-              <span style="font-size:0.6rem;opacity:.45;letter-spacing:.04em;">{{ item.idx }}</span>
-              {{ item.label }}
-            </a>
-          </sc-for>
-        </nav>
 
         <div style="display:flex;gap:18px;flex-wrap:wrap;">
           <sc-for list="{{ socials }}" as="s" hint-placeholder-count="4">
