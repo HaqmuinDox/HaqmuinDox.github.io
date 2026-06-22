@@ -28,7 +28,7 @@
   }
   [data-sidebar] { position: sticky; top: 76px; padding-top: 52px; }
   [data-rail]    { position: sticky; top: 76px; padding-top: 52px; display: flex; flex-direction: column; gap: 14px; }
-  [data-main]    { display: flex; flex-direction: column; gap: 72px; padding-top: 52px; min-width: 0; }
+  [data-main]    { display: flex; flex-direction: column; gap: 90px; padding-top: 52px; min-width: 0; }
   @media (max-width: 1100px) {
     [data-layout] { grid-template-columns: 280px 1fr; }
     [data-rail]   { display: none; }
@@ -110,6 +110,13 @@
   [data-tilt-zone]::-webkit-scrollbar { display:none; }
   .social-icon { display:block;width:18px;height:18px;filter:brightness(0) invert(1);transition:opacity .2s; }
   [data-theme="light"] .social-icon { filter:brightness(0); }
+  @keyframes scrollBounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(10px)} }
+  .skill-li { transition:border-color .18s,color .18s,transform .22s cubic-bezier(.22,1,.36,1); }
+  .skill-li:hover { transform:translateY(-2px); }
+  .exp-row { border-radius:8px;transition:background .28s; }
+  .exp-row:hover { background:color-mix(in oklab,var(--accent) 5%,transparent); }
+  .rail-widget { transition:border-color .28s,transform .28s cubic-bezier(.22,1,.36,1); }
+  .rail-widget:hover { border-color:color-mix(in oklab,var(--accent) 50%,var(--card-border)) !important;transform:translateY(-3px); }
 </style>
 </helmet>
 
@@ -149,8 +156,22 @@
     </div>
   </header>
 
+  <!-- HERO -->
+  <section id="top" style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);text-align:center;padding:0 24px;overflow:hidden;">
+    <div aria-hidden="true" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,color-mix(in oklab,var(--accent) 16%,transparent),transparent 65%);filter:blur(70px);opacity:.32;pointer-events:none;animation:dcGlow 11s ease-in-out infinite;"></div>
+    <div data-reveal style="position:relative;z-index:1;">
+      <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;letter-spacing:.22em;text-transform:uppercase;color:var(--txt3);margin:0 0 32px;">Portfolio — '26</p>
+      <h1 style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:clamp(4.5rem,11vw,9.5rem);line-height:.96;letter-spacing:-.03em;margin:0 0 36px;color:var(--txt);">Dan<br>Cardoz</h1>
+      <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:clamp(0.88rem,1.8vw,1.18rem);color:var(--accent);margin:0;min-height:1.6em;line-height:1.6;">{{ typedRole }}<span style="animation:blink 1s step-end infinite;will-change:opacity;">|</span></p>
+    </div>
+    <div aria-hidden="true" style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;animation:scrollBounce 2s ease-in-out infinite;">
+      <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txt3);">Scroll</span>
+      <span style="color:var(--txt3);font-size:0.85rem;">↓</span>
+    </div>
+  </section>
+
   <!-- THREE-COLUMN -->
-  <div data-layout id="top">
+  <div data-layout>
 
     <!-- ═══ LEFT SIDEBAR ═══ -->
     <aside data-sidebar>
@@ -158,8 +179,8 @@
         <div aria-hidden="true" style="position:absolute;top:-20px;left:-60px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,color-mix(in oklab,var(--accent) 28%,transparent),transparent 60%);filter:blur(38px);opacity:.48;pointer-events:none;z-index:-1;animation:dcGlow 11s ease-in-out infinite;"></div>
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txt3);margin:0 0 18px;">Portfolio — '26</p>
         <h1 style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:clamp(1.9rem,2.8vw,2.65rem);line-height:1.06;letter-spacing:-.024em;margin:0 0 14px;color:var(--txt);">Dan<br>Cardoz</h1>
-        <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.88rem;color:var(--accent);margin:0 0 22px;min-height:1.5em;line-height:1.5;">{{ typedRole }}<span style="animation:blink 1s step-end infinite;will-change:opacity;">|</span></p>
-        <p style="font-size:0.95rem;line-height:1.7;color:var(--txt2);margin:0 0 28px;">{{ intro }}</p>
+        <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.95rem;color:var(--accent);margin:0 0 22px;min-height:1.5em;line-height:1.5;">{{ typedRole }}<span style="animation:blink 1s step-end infinite;will-change:opacity;">|</span></p>
+        <p style="font-size:1.02rem;line-height:1.7;color:var(--txt2);margin:0 0 28px;">{{ intro }}</p>
 
         <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:32px;">
           <a href="{{ email }}" style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--txt);background:transparent;border:1px solid var(--btn-border);padding:11px 16px;border-radius:7px;text-decoration:none;transition:border-color .2s,color .2s;" style-hover="border-color:var(--accent);color:var(--accent);">✦ Get in touch</a>
@@ -177,7 +198,7 @@
 
         <div style="display:flex;gap:18px;flex-wrap:wrap;">
           <sc-for list="{{ socials }}" as="s" hint-placeholder-count="4">
-            <a href="{{ s.href }}" target="_blank" rel="noopener" aria-label="{{ s.label }}" style="display:inline-flex;opacity:0.6;transition:opacity .2s;" style-hover="opacity:1;">
+            <a href="{{ s.href }}" target="_blank" rel="noopener" aria-label="{{ s.label }}" style="display:inline-flex;opacity:0.6;transition:opacity .22s,transform .28s cubic-bezier(.22,1,.36,1);" style-hover="opacity:1;transform:scale(1.18) translateY(-3px);">
               <img src="{{ s.icon }}" alt="" class="social-icon">
             </a>
           </sc-for>
@@ -195,8 +216,8 @@
           <h2 style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0;">About</h2>
           <span style="flex:1;height:1px;background:var(--section-border);"></span>
         </div>
-        <p data-reveal style="font-size:1rem;line-height:1.74;color:var(--txt2);margin:0 0 12px;">{{ about1 }}</p>
-        <p data-reveal style="font-size:1rem;line-height:1.74;color:var(--txt2);margin:0;">{{ about2 }}</p>
+        <p data-reveal style="font-size:1.07rem;line-height:1.74;color:var(--txt2);margin:0 0 12px;">{{ about1 }}</p>
+        <p data-reveal style="font-size:1.07rem;line-height:1.74;color:var(--txt2);margin:0;">{{ about2 }}</p>
       </section>
 
       <!-- EXPERIENCE -->
@@ -208,14 +229,14 @@
         </div>
         <div style="display:flex;flex-direction:column;">
           <sc-for list="{{ experience }}" as="x" hint-placeholder-count="3">
-            <div data-reveal style="display:grid;grid-template-columns:108px 1fr;gap:20px;padding:20px 0;border-top:1px solid var(--section-border);">
+            <div data-reveal class="exp-row" style="display:grid;grid-template-columns:108px 1fr;gap:20px;padding:20px 0;border-top:1px solid var(--section-border);">
               <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);padding-top:4px;line-height:1.5;">{{ x.period }}</span>
               <div>
                 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:8px;">
-                  <span style="font-weight:600;font-size:0.98rem;color:var(--txt);">{{ x.role }}</span>
+                  <span style="font-weight:600;font-size:1.05rem;color:var(--txt);">{{ x.role }}</span>
                   <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--accent);">{{ x.org }}</span>
                 </div>
-                <p style="margin:0;font-size:0.9rem;line-height:1.65;color:var(--txt2);">{{ x.desc }}</p>
+                <p style="margin:0;font-size:0.95rem;line-height:1.65;color:var(--txt2);">{{ x.desc }}</p>
               </div>
             </div>
           </sc-for>
@@ -235,10 +256,10 @@
             <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
               <a href="{{ p.href }}" target="_blank" rel="noopener" data-reveal data-tilt style="display:flex;flex-direction:column;gap:14px;background:var(--card-bg);border:0.5px solid var(--card-border);border-radius:12px;padding:22px;text-decoration:none;will-change:transform;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);flex:none;width:252px;scroll-snap-align:start;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-                  <span style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.88rem;color:var(--txt);line-height:1.35;">{{ p.title }}</span>
+                  <span style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.94rem;color:var(--txt);line-height:1.35;">{{ p.title }}</span>
                   <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.68rem;color:var(--accent);white-space:nowrap;margin-top:2px;flex:none;">{{ p.linkLabel }}</span>
                 </div>
-                <p style="margin:0;font-size:0.86rem;line-height:1.63;color:var(--txt2);flex:1;">{{ p.desc }}</p>
+                <p style="margin:0;font-size:0.92rem;line-height:1.63;color:var(--txt2);flex:1;">{{ p.desc }}</p>
                 <ul style="display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0;">
                   <sc-for list="{{ p.tags }}" as="t" hint-placeholder-count="3">
                     <li style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.64rem;color:var(--txt2);background:var(--skill-bg);border:0.5px solid var(--skill-border);border-radius:4px;padding:3px 8px;">{{ t }}</li>
@@ -286,7 +307,7 @@
               <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);padding-top:7px;">{{ g.label }}</span>
               <ul style="display:flex;flex-wrap:wrap;gap:7px;list-style:none;margin:0;padding:0;">
                 <sc-for list="{{ g.items }}" as="item" hint-placeholder-count="5">
-                  <li style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--txt);background:var(--skill-bg);border:0.5px solid var(--skill-border);border-radius:6px;padding:6px 12px;transition:border-color .18s,color .18s;" style-hover="border-color:var(--accent);color:var(--accent);">{{ item }}</li>
+                  <li class="skill-li" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.78rem;color:var(--txt);background:var(--skill-bg);border:0.5px solid var(--skill-border);border-radius:6px;padding:6px 12px;" style-hover="border-color:var(--accent);color:var(--accent);">{{ item }}</li>
                 </sc-for>
               </ul>
             </div>
@@ -302,14 +323,14 @@
           <span style="flex:1;height:1px;background:var(--section-border);"></span>
         </div>
         <sc-for list="{{ education }}" as="e" hint-placeholder-count="1">
-          <div data-reveal style="display:grid;grid-template-columns:108px 1fr;gap:20px;padding:16px 0;">
+          <div data-reveal class="exp-row" style="display:grid;grid-template-columns:108px 1fr;gap:20px;padding:16px 0;">
             <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);padding-top:4px;">{{ e.period }}</span>
             <div>
               <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:7px;">
-                <span style="font-weight:600;font-size:0.98rem;color:var(--txt);">{{ e.degree }}</span>
+                <span style="font-weight:600;font-size:1.05rem;color:var(--txt);">{{ e.degree }}</span>
                 <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.74rem;color:var(--accent);">{{ e.org }}</span>
               </div>
-              <p style="margin:0;font-size:0.9rem;line-height:1.65;color:var(--txt2);">{{ e.desc }}</p>
+              <p style="margin:0;font-size:0.95rem;line-height:1.65;color:var(--txt2);">{{ e.desc }}</p>
             </div>
           </div>
         </sc-for>
@@ -322,11 +343,11 @@
           <h2 style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0;">Get in Touch</h2>
           <span style="flex:1;height:1px;background:var(--section-border);"></span>
         </div>
-        <p data-reveal style="font-size:1rem;line-height:1.68;color:var(--txt2);margin:0 0 18px;max-width:52ch;">Got a project, a question, or just want to talk shop about self-hosting? My inbox is open.</p>
+        <p data-reveal style="font-size:1.07rem;line-height:1.68;color:var(--txt2);margin:0 0 18px;max-width:52ch;">Got a project, a question, or just want to talk shop about self-hosting? My inbox is open.</p>
         <a href="{{ email }}" data-reveal style="display:inline-block;font-family:'Space Mono',ui-monospace,monospace;font-size:clamp(1rem,2.2vw,1.45rem);font-weight:700;color:var(--txt);text-decoration:none;border-bottom:2px solid var(--accent);padding-bottom:3px;transition:color .2s;" style-hover="color:var(--accent);">{{ emailText }}</a>
         <div data-reveal style="display:flex;gap:20px;flex-wrap:wrap;margin-top:24px;">
           <sc-for list="{{ socials }}" as="s" hint-placeholder-count="4">
-            <a href="{{ s.href }}" target="_blank" rel="noopener" aria-label="{{ s.label }}" style="display:inline-flex;opacity:0.6;transition:opacity .2s;" style-hover="opacity:1;">
+            <a href="{{ s.href }}" target="_blank" rel="noopener" aria-label="{{ s.label }}" style="display:inline-flex;opacity:0.6;transition:opacity .22s,transform .28s cubic-bezier(.22,1,.36,1);" style-hover="opacity:1;transform:scale(1.18) translateY(-3px);">
               <img src="{{ s.icon }}" alt="" class="social-icon">
             </a>
           </sc-for>
@@ -340,19 +361,19 @@
     <aside data-rail>
 
       <!-- NOW -->
-      <div data-reveal style="border:0.5px solid var(--card-border);border-radius:11px;padding:18px;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
+      <div data-reveal class="rail-widget" style="border:0.5px solid var(--card-border);border-radius:11px;padding:18px;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;font-weight:700;color:var(--txt);letter-spacing:.09em;text-transform:uppercase;margin:0 0 13px;">Now</p>
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.62rem;color:var(--txt3);margin:0 0 4px;text-transform:uppercase;letter-spacing:.07em;">Building</p>
-        <p style="font-size:0.83rem;color:var(--txt2);margin:0 0 14px;line-height:1.52;">{{ nowWorking }}</p>
+        <p style="font-size:0.88rem;color:var(--txt2);margin:0 0 14px;line-height:1.52;">{{ nowWorking }}</p>
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.62rem;color:var(--txt3);margin:0 0 4px;text-transform:uppercase;letter-spacing:.07em;">Reading</p>
-        <p style="font-size:0.83rem;color:var(--txt2);margin:0;line-height:1.52;">{{ nowReading }}</p>
+        <p style="font-size:0.88rem;color:var(--txt2);margin:0;line-height:1.52;">{{ nowReading }}</p>
       </div>
 
       <!-- LATEST NOTE -->
-      <div data-reveal style="border:0.5px solid var(--card-border);border-radius:11px;padding:18px;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
+      <div data-reveal class="rail-widget" style="border:0.5px solid var(--card-border);border-radius:11px;padding:18px;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;font-weight:700;color:var(--txt);letter-spacing:.09em;text-transform:uppercase;margin:0 0 12px;">Latest Note</p>
         <p style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.64rem;color:var(--txt3);margin:0 0 7px;">{{ latestPost.date }}</p>
-        <a href="{{ latestPost.href }}" style="font-size:0.85rem;font-weight:600;color:var(--txt);text-decoration:none;line-height:1.47;display:block;transition:color .2s;" style-hover="color:var(--accent);">{{ latestPost.title }} ↗</a>
+        <a href="{{ latestPost.href }}" style="font-size:0.9rem;font-weight:600;color:var(--txt);text-decoration:none;line-height:1.47;display:block;transition:color .2s;" style-hover="color:var(--accent);">{{ latestPost.title }} ↗</a>
       </div>
 
     </aside>
