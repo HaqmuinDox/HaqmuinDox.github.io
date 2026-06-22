@@ -84,7 +84,7 @@
 
     <script>
         // Check for saved user preference to keep theme consistent
-        const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : 'dark';
+        const currentTheme = localStorage.getItem('dc-theme') || 'dark';
         if (currentTheme) {
             document.documentElement.setAttribute('data-theme', currentTheme);
         }

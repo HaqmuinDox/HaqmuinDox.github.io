@@ -137,7 +137,7 @@
       <nav style="display:flex;align-items:center;gap:22px;">
         <a href="#projects" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Projects</a>
         <a href="/writing/" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Writing</a>
-        <a href="{{ cloudHref }}" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Cloud ↗</a>
+        <a href="{{ cloudHref }}" onClick="{{ handleCloudClick }}" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Cloud ↗</a>
       </nav>
       <div style="display:flex;align-items:center;gap:8px;flex:none;">
         <button id="theme-btn" onClick="{{ toggleTheme }}" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;" style-hover="border-color:var(--accent);color:var(--accent);">
@@ -252,7 +252,7 @@
 
       <!-- PRIVATE CLOUD BANNER -->
       <section id="cloud" style="scroll-margin-top:82px;">
-        <a href="{{ cloudHref }}" target="_blank" rel="noopener" data-reveal style="display:flex;align-items:center;gap:20px;background:linear-gradient(130deg,color-mix(in oklab,var(--accent) 12%,var(--card-bg)) 0%,var(--card-bg) 60%);border:0.5px solid var(--card-border);border-radius:13px;padding:22px 24px;text-decoration:none;transition:border-color .22s,transform .22s;backdrop-filter:blur(10px);" style-hover="border-color:var(--accent);transform:translateY(-3px);">
+        <a href="{{ cloudHref }}" onClick="{{ handleCloudClick }}" target="_blank" rel="noopener" data-reveal style="display:flex;align-items:center;gap:20px;background:linear-gradient(130deg,color-mix(in oklab,var(--accent) 12%,var(--card-bg)) 0%,var(--card-bg) 60%);border:0.5px solid var(--card-border);border-radius:13px;padding:22px 24px;text-decoration:none;transition:border-color .22s,transform .22s;backdrop-filter:blur(10px);" style-hover="border-color:var(--accent);transform:translateY(-3px);">
           <div style="width:46px;height:46px;border-radius:10px;background:color-mix(in oklab,var(--accent) 15%,transparent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex:none;">☁️</div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
@@ -296,7 +296,7 @@
       <!-- EDUCATION -->
       <section id="education" style="scroll-margin-top:82px;">
         <div data-reveal style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--accent);">06</span>
+          <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--accent);">05</span>
           <h2 style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0;">Education</h2>
           <span style="flex:1;height:1px;background:var(--section-border);"></span>
         </div>
@@ -317,7 +317,7 @@
       <!-- CONTACT -->
       <section id="contact" style="scroll-margin-top:82px;">
         <div data-reveal style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--accent);">07</span>
+          <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--accent);">06</span>
           <h2 style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0;">Get in Touch</h2>
           <span style="flex:1;height:1px;background:var(--section-border);"></span>
         </div>
@@ -558,6 +558,17 @@ class Component extends DCLogic {
     });
   }
 
+  handleCloudClick = (e) => {
+    e.preventDefault();
+    const url = 'https://nextcloud.home.dancardoz.de/';
+    const win = window.open('about:blank', '_blank', 'noopener');
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    fetch(url, { signal: ctrl.signal, mode: 'no-cors' })
+      .then(() => { clearTimeout(timer); if (win) win.location = url; })
+      .catch(() => { clearTimeout(timer); if (win) win.location = '/secure-cloud'; });
+  };
+
   galleryPrev = () => {
     if (!this.galleryEl) return;
     const card = this.galleryEl.querySelector('[data-tilt]');
@@ -592,6 +603,7 @@ class Component extends DCLogic {
       typedRole: roleText.slice(0, this.state.typedIdx),
 
 
+      handleCloudClick: this.handleCloudClick,
       cloudHref: 'https://nextcloud.home.dancardoz.de',
       email:     'mailto:contact@dancardoz.de',
       emailText: 'contact@dancardoz.de',
@@ -608,7 +620,8 @@ class Component extends DCLogic {
         { idx: '02', label: 'Experience', href: '#experience' },
         { idx: '03', label: 'Projects',   href: '#projects' },
         { idx: '04', label: 'Stack',      href: '#skills' },
-        { idx: '05', label: 'Contact',    href: '#contact' }
+        { idx: '05', label: 'Education',  href: '#education' },
+        { idx: '06', label: 'Contact',    href: '#contact' }
       ],
       socials: [
         { label: 'GitHub',    href: 'https://github.com/HaqmuinDox',                     icon: '/assets/icons/github.svg' },
@@ -654,8 +667,8 @@ class Component extends DCLogic {
         },
         {
           title: 'Home Server & Private Cloud',
-          linkLabel: 'Open ↗',
-          href: 'private',
+          linkLabel: 'private',
+          href: '#',
           desc: '24/7 multi-service private cloud on Ubuntu — Nextcloud, Vaultwarden, n8n, Mosquitto and a full Dawarich stack (PostgreSQL/PostGIS, Redis). All services restricted to a Tailscale VPN.',
           tags: ['Docker', 'Ubuntu', 'Tailscale']
         },

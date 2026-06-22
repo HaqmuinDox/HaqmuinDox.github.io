@@ -66,7 +66,7 @@ function buildPrevNext(posts, idx) {
 }
 
 function buildIndexPage(posts) {
-  const json = JSON.stringify(posts);
+  const json = JSON.stringify(posts).replace(/<\/script>/gi, '<\\/script>');
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -205,13 +205,15 @@ function updateHomepage(posts) {
   const indexPath = path.join(ROOT, 'index.html');
   let html = fs.readFileSync(indexPath, 'utf8');
 
-  const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '\\r').replace(/\n/g, '\\n');
   const latest = posts[0];
 
-  html = html.replace(
-    /latestPost:\s*\{[^}]*\},/,
+  const updated = html.replace(
+    /latestPost:\s*\{[\s\S]*?\},/,
     `latestPost: { date: '${esc(latest.date)}', title: '${esc(latest.title)}', href: '${esc(latest.href)}' },`
   );
+  if (updated === html) console.warn('WARNING: latestPost regex did not match — index.html not updated');
+  html = updated;
 
   fs.writeFileSync(indexPath, html, 'utf8');
   console.log('Updated: index.html');
@@ -234,6 +236,7 @@ function main() {
     posts.push({
       slug:     data.slug,
       title:    data.title,
+      rawDate:  String(data.date),
       date:     formatDate(data.date),
       tag:      data.tag,
       readtime: data.readtime,
@@ -244,8 +247,8 @@ function main() {
     });
   }
 
-  // Newest first
-  posts.sort((a, b) => b.date.localeCompare(a.date));
+  // Newest first — sort on raw ISO string before formatting
+  posts.sort((a, b) => b.rawDate.localeCompare(a.rawDate));
 
   const template = fs.readFileSync(TMPL, 'utf8');
 
