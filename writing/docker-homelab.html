@@ -234,7 +234,7 @@
     <h1 class="article-title">My Docker homelab, container by container</h1>
 
     <div class="prose">
-      <p>I run a private cloud on a mini PC in my flat. It&#39;s on 24/7, costs almost nothing to run, and handles files, passwords, automation, and location tracking without any data leaving my network (unless I choose to). This is a snapshot of what&#39;s running and why.</p>
+      <p>I run a private cloud on a home server. It&#39;s on 24/7, costs almost nothing to run, and handles files, passwords, automation, and location tracking without any data leaving my network (unless I choose to). This is a snapshot of what&#39;s running and why.</p>
 <h2 id="the-stack-at-a-glance">The stack at a glance</h2>
 <table>
 <thead>
@@ -264,7 +264,7 @@
 <td>Location history</td>
 </tr>
 </tbody></table>
-<p>All containers sit behind a Tailscale VPN. The host runs Ubuntu 22.04 with Apache2 as the reverse proxy for internal HTTPS.</p>
+<p>All containers sit behind a Tailscale VPN. The host runs Ubuntu with a reverse proxy handling internal HTTPS.</p>
 <h2 id="nextcloud">Nextcloud</h2>
 <p>The centrepiece. I use it for file sync across my laptop and phone, CalDAV/CardDAV for contacts and calendars, and Nextcloud Notes as a simple scratchpad.</p>
 <p><strong>What I&#39;d do differently</strong>: I installed it with the standard Docker image and a MariaDB container. Next time I&#39;d use the all-in-one (AIO) image — it bundles a working TURN server, onlyoffice, and automatic backups, which I&#39;ve since had to set up manually.</p>
@@ -276,7 +276,7 @@
     image: vaultwarden/server:latest
     restart: unless-stopped
     environment:
-      - DOMAIN=https://vault.home.dancardoz.de
+      - DOMAIN=https://vault.home.example.com
       - SIGNUPS_ALLOWED=false
     volumes:
       - vw_data:/data
@@ -290,9 +290,9 @@
     image: n8nio/n8n:latest
     restart: unless-stopped
     environment:
-      - N8N_HOST=n8n.home.dancardoz.de
+      - N8N_HOST=n8n.home.example.com
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n.home.dancardoz.de/
+      - WEBHOOK_URL=https://n8n.home.example.com/
     volumes:
       - n8n_data:/home/node/.n8n
 </code></pre>
@@ -315,25 +315,25 @@ password_file /mosquitto/config/passwd
       - dawarich_redis
 
   dawarich_db:
-    image: postgis/postgis:16-3.4-alpine
+    image: postgis/postgis:latest
 
   dawarich_redis:
-    image: redis:7-alpine
+    image: redis:alpine
 </code></pre>
 <p><strong>What I&#39;d do differently</strong>: Dawarich is still early-stage software and has had some database migration issues between releases. I&#39;d set up automated Postgres backups before running it in production, which I didn&#39;t do initially and regretted during an upgrade.</p>
 <h2 id="networking-and-tailscale">Networking and Tailscale</h2>
-<p>Every service is bound to the internal Docker network and exposed to Apache via <code>localhost:PORT</code>. Apache handles TLS termination and proxies to the right container based on the <code>ServerName</code>.</p>
-<p>Tailscale handles access control. The mini PC is a Tailscale exit node for my phone when I&#39;m on untrusted networks, and all the self-hosted services are reachable by name because of Tailscale&#39;s MagicDNS.</p>
+<p>Every service is bound to the internal Docker network and exposed to the reverse proxy via <code>localhost:PORT</code>. The proxy handles TLS termination and routes to the right container based on the hostname.</p>
+<p>Tailscale handles access control. All the self-hosted services are reachable only from devices in my tailnet — no ports are forwarded on the router, so nothing is directly reachable from the internet.</p>
 <pre><code class="language-bash"># Check which tailscale devices can reach the server
 tailscale status
 </code></pre>
-<p>No ports are forwarded on my router. The attack surface for everything here is: Tailscale&#39;s auth layer.</p>
+<p>The attack surface for everything here is: Tailscale&#39;s auth layer.</p>
 <h2 id="backup-strategy">Backup strategy</h2>
 <p>A cron job runs nightly and:</p>
 <ol>
 <li>Dumps each database to a compressed SQL file</li>
-<li>Rsyncs the dumps + Docker volumes to an external USB drive</li>
-<li>Uploads a copy to a remote location (Nextcloud on a friend&#39;s server)</li>
+<li>Rsyncs the dumps + Docker volumes to local external storage</li>
+<li>Uploads a copy to a remote location offsite</li>
 </ol>
 <p>The <code>3-2-1</code> rule: 3 copies, 2 media types, 1 offsite. I&#39;m at <code>3-2-1</code> for the databases and <code>2-1-1</code> for the file volumes. Good enough for personal data.</p>
 

@@ -18,10 +18,10 @@ Tailscale solves this by making your services reachable only to devices enrolled
 
 ## Prerequisites
 
-- Ubuntu server (I run 22.04 on a repurposed mini PC)
+- Ubuntu server
 - Docker and Docker Compose installed
 - Tailscale installed and authenticated on the server
-- A domain name (I use `nextcloud.home.dancardoz.de`) with DNS pointing to your Tailscale IP
+- A domain name (e.g. `nextcloud.home.example.com`) with DNS pointing to your Tailscale IP
 
 ### Get your Tailscale IP
 
@@ -30,7 +30,7 @@ tailscale ip -4
 # → 100.x.x.x
 ```
 
-Add an A record in your DNS provider pointing `nextcloud.home.dancardoz.de` to that IP. Because this is a private IP, only devices in your tailnet will be able to resolve it to something reachable.
+Add an A record in your DNS provider pointing your chosen hostname to that IP. Because this is a private IP, only devices in your tailnet will be able to resolve it to something reachable.
 
 ## Docker Compose setup
 
@@ -38,21 +38,21 @@ Add an A record in your DNS provider pointing `nextcloud.home.dancardoz.de` to t
 version: "3.9"
 services:
   nextcloud:
-    image: nextcloud:28
+    image: nextcloud:latest
     restart: unless-stopped
     environment:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=${NC_DB_PASSWORD}
-      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.home.dancardoz.de
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.home.example.com
     volumes:
       - nextcloud_data:/var/www/html
     depends_on:
       - db
 
   db:
-    image: mariadb:11
+    image: mariadb:latest
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
@@ -82,11 +82,11 @@ Then add a virtual host:
 
 ```apache
 <VirtualHost *:443>
-  ServerName nextcloud.home.dancardoz.de
+  ServerName nextcloud.home.example.com
 
   SSLEngine on
-  SSLCertificateFile    /etc/letsencrypt/live/nextcloud.home.dancardoz.de/fullchain.pem
-  SSLCertificateKeyFile /etc/letsencrypt/live/nextcloud.home.dancardoz.de/privkey.pem
+  SSLCertificateFile    /etc/letsencrypt/live/nextcloud.home.example.com/fullchain.pem
+  SSLCertificateKeyFile /etc/letsencrypt/live/nextcloud.home.example.com/privkey.pem
 
   ProxyPass        / http://localhost:8080/
   ProxyPassReverse / http://localhost:8080/
@@ -104,7 +104,7 @@ Here's the non-obvious part: Certbot's HTTP-01 challenge requires a publicly rea
 sudo apt install certbot python3-certbot-dns-<your-provider>
 sudo certbot certonly \
   --dns-<your-provider> \
-  -d nextcloud.home.dancardoz.de
+  -d nextcloud.home.example.com
 ```
 
 Replace `<your-provider>` with your DNS provider's plugin (e.g. `cloudflare`, `namecheap`). You'll need an API token with permission to add TXT records.
@@ -115,7 +115,7 @@ After the first login, Nextcloud will likely warn about a few missing config val
 
 ```php
 'overwriteprotocol' => 'https',
-'overwritehost'     => 'nextcloud.home.dancardoz.de',
+'overwritehost'     => 'nextcloud.home.example.com',
 'trusted_proxies'   => ['127.0.0.1'],
 ```
 
@@ -127,7 +127,7 @@ Nextcloud's background jobs (thumbnail generation, activity cleanup, etc.) defau
 
 ```bash
 # On the host, not inside the container
-* * * * * docker exec nextcloud_nextcloud_1 \
+* * * * * docker exec <nextcloud-container-name> \
   php -f /var/www/html/cron.php
 ```
 
@@ -137,4 +137,4 @@ The container name depends on your Compose project name. Check with `docker ps`.
 
 After all this: Nextcloud is accessible from any device in my tailnet, syncing contacts, calendars, and files. The private IP means it never appears in any internet scan. Certbot renews the certificate automatically via a systemd timer.
 
-Total monthly cost: electricity for the mini PC and the domain name.
+Total monthly cost: electricity for the server and the domain name.

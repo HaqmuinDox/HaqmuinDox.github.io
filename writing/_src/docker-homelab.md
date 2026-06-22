@@ -8,7 +8,7 @@ excerpt: "A rundown of every container I run on my home server — what each one
 draft: false
 ---
 
-I run a private cloud on a mini PC in my flat. It's on 24/7, costs almost nothing to run, and handles files, passwords, automation, and location tracking without any data leaving my network (unless I choose to). This is a snapshot of what's running and why.
+I run a private cloud on a home server. It's on 24/7, costs almost nothing to run, and handles files, passwords, automation, and location tracking without any data leaving my network (unless I choose to). This is a snapshot of what's running and why.
 
 ## The stack at a glance
 
@@ -20,7 +20,7 @@ I run a private cloud on a mini PC in my flat. It's on 24/7, costs almost nothin
 | Mosquitto | MQTT broker |
 | Dawarich | Location history |
 
-All containers sit behind a Tailscale VPN. The host runs Ubuntu 22.04 with Apache2 as the reverse proxy for internal HTTPS.
+All containers sit behind a Tailscale VPN. The host runs Ubuntu with a reverse proxy handling internal HTTPS.
 
 ## Nextcloud
 
@@ -40,7 +40,7 @@ services:
     image: vaultwarden/server:latest
     restart: unless-stopped
     environment:
-      - DOMAIN=https://vault.home.dancardoz.de
+      - DOMAIN=https://vault.home.example.com
       - SIGNUPS_ALLOWED=false
     volumes:
       - vw_data:/data
@@ -61,9 +61,9 @@ n8n has a visual editor (a DAG of nodes) and can call any HTTP endpoint, which m
     image: n8nio/n8n:latest
     restart: unless-stopped
     environment:
-      - N8N_HOST=n8n.home.dancardoz.de
+      - N8N_HOST=n8n.home.example.com
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n.home.dancardoz.de/
+      - WEBHOOK_URL=https://n8n.home.example.com/
     volumes:
       - n8n_data:/home/node/.n8n
 ```
@@ -97,32 +97,32 @@ The stack is heavier than the others: it requires PostgreSQL with the PostGIS ex
       - dawarich_redis
 
   dawarich_db:
-    image: postgis/postgis:16-3.4-alpine
+    image: postgis/postgis:latest
 
   dawarich_redis:
-    image: redis:7-alpine
+    image: redis:alpine
 ```
 
 **What I'd do differently**: Dawarich is still early-stage software and has had some database migration issues between releases. I'd set up automated Postgres backups before running it in production, which I didn't do initially and regretted during an upgrade.
 
 ## Networking and Tailscale
 
-Every service is bound to the internal Docker network and exposed to Apache via `localhost:PORT`. Apache handles TLS termination and proxies to the right container based on the `ServerName`.
+Every service is bound to the internal Docker network and exposed to the reverse proxy via `localhost:PORT`. The proxy handles TLS termination and routes to the right container based on the hostname.
 
-Tailscale handles access control. The mini PC is a Tailscale exit node for my phone when I'm on untrusted networks, and all the self-hosted services are reachable by name because of Tailscale's MagicDNS.
+Tailscale handles access control. All the self-hosted services are reachable only from devices in my tailnet — no ports are forwarded on the router, so nothing is directly reachable from the internet.
 
 ```bash
 # Check which tailscale devices can reach the server
 tailscale status
 ```
 
-No ports are forwarded on my router. The attack surface for everything here is: Tailscale's auth layer.
+The attack surface for everything here is: Tailscale's auth layer.
 
 ## Backup strategy
 
 A cron job runs nightly and:
 1. Dumps each database to a compressed SQL file
-2. Rsyncs the dumps + Docker volumes to an external USB drive
-3. Uploads a copy to a remote location (Nextcloud on a friend's server)
+2. Rsyncs the dumps + Docker volumes to local external storage
+3. Uploads a copy to a remote location offsite
 
 The `3-2-1` rule: 3 copies, 2 media types, 1 offsite. I'm at `3-2-1` for the databases and `2-1-1` for the file volumes. Good enough for personal data.
