@@ -105,6 +105,8 @@
   @keyframes pulseDot { 0%,100%{box-shadow:0 0 0 0 rgba(102,179,255,.55)} 65%{box-shadow:0 0 0 7px rgba(102,179,255,0)} }
   [data-tilt-zone] { scrollbar-width:none; }
   [data-tilt-zone]::-webkit-scrollbar { display:none; }
+  .social-icon { display:block;width:18px;height:18px;filter:brightness(0) invert(1);transition:opacity .2s; }
+  [data-theme="light"] .social-icon { filter:brightness(0); }
 </style>
 </helmet>
 
@@ -170,8 +172,10 @@
         </nav>
 
         <div style="display:flex;gap:18px;flex-wrap:wrap;">
-          <sc-for list="{{ socials }}" as="s" hint-placeholder-count="3">
-            <a href="{{ s.href }}" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.71rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--accent);">{{ s.label }} ↗</a>
+          <sc-for list="{{ socials }}" as="s" hint-placeholder-count="4">
+            <a href="{{ s.href }}" target="_blank" rel="noopener" aria-label="{{ s.label }}" style="display:inline-flex;opacity:0.6;transition:opacity .2s;" style-hover="opacity:1;">
+              <img src="{{ s.icon }}" alt="" class="social-icon">
+            </a>
           </sc-for>
         </div>
       </div>
@@ -317,8 +321,10 @@
         <p data-reveal style="font-size:1rem;line-height:1.68;color:var(--txt2);margin:0 0 18px;max-width:52ch;">Got a project, a question, or just want to talk shop about self-hosting? My inbox is open.</p>
         <a href="{{ email }}" data-reveal style="display:inline-block;font-family:'Space Mono',ui-monospace,monospace;font-size:clamp(1rem,2.2vw,1.45rem);font-weight:700;color:var(--txt);text-decoration:none;border-bottom:2px solid var(--accent);padding-bottom:3px;transition:color .2s;" style-hover="color:var(--accent);">{{ emailText }}</a>
         <div data-reveal style="display:flex;gap:20px;flex-wrap:wrap;margin-top:24px;">
-          <sc-for list="{{ socials }}" as="s" hint-placeholder-count="3">
-            <a href="{{ s.href }}" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;color:var(--txt2);text-decoration:none;transition:color .2s;" style-hover="color:var(--accent);">{{ s.label }} ↗</a>
+          <sc-for list="{{ socials }}" as="s" hint-placeholder-count="4">
+            <a href="{{ s.href }}" target="_blank" rel="noopener" aria-label="{{ s.label }}" style="display:inline-flex;opacity:0.6;transition:opacity .2s;" style-hover="opacity:1;">
+              <img src="{{ s.icon }}" alt="" class="social-icon">
+            </a>
           </sc-for>
         </div>
         <p style="margin:52px 0 0;font-family:'Space Mono',ui-monospace,monospace;font-size:0.67rem;color:var(--footer-txt);">© 2026 Dan Cardoz — built &amp; self-hosted with care.</p>
@@ -635,9 +641,10 @@ class Component extends DCLogic {
         { idx: '05', label: 'Contact',    href: '#contact' }
       ],
       socials: [
-        { label: 'GitHub',   href: 'https://github.com/HaqmuinDox' },
-        { label: 'LinkedIn', href: 'https://www.linkedin.com/in/dan-cardoz-9a2642253/' },
-        { label: 'Email',    href: 'mailto:contact@dancardoz.de' }
+        { label: 'GitHub',    href: 'https://github.com/HaqmuinDox',                     icon: 'https://cdn.simpleicons.org/github' },
+        { label: 'LinkedIn',  href: 'https://www.linkedin.com/in/dan-cardoz-9a2642253/', icon: 'https://cdn.simpleicons.org/linkedin' },
+        { label: 'Instagram', href: 'https://www.instagram.com/dan_cardoz/',             icon: 'https://cdn.simpleicons.org/instagram' },
+        { label: 'X',         href: 'https://x.com/dan_cardoz',                          icon: 'https://cdn.simpleicons.org/x' }
       ],
       services: [
         { name: 'Nextcloud' }, { name: 'Vaultwarden' },
