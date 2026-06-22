@@ -48,6 +48,8 @@
   @keyframes marquee  { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
   @keyframes blink    { 0%,49%{opacity:1} 50%,100%{opacity:0} }
   @keyframes pulseDot { 0%,100%{box-shadow:0 0 0 0 rgba(102,179,255,.55)} 65%{box-shadow:0 0 0 7px rgba(102,179,255,0)} }
+  [data-tilt-zone] { scrollbar-width:none; }
+  [data-tilt-zone]::-webkit-scrollbar { display:none; }
 </style>
 </helmet>
 
@@ -163,21 +165,25 @@
           <h2 style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0;">Selected Projects</h2>
           <span style="flex:1;height:1px;background:var(--section-border);"></span>
         </div>
-        <div data-tilt-zone style="display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px;">
-          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
-            <a href="{{ p.href }}" target="_blank" rel="noopener" data-reveal data-tilt style="display:flex;flex-direction:column;gap:14px;background:var(--card-bg);border:0.5px solid var(--card-border);border-radius:12px;padding:22px;text-decoration:none;will-change:transform;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-                <span style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.88rem;color:var(--txt);line-height:1.35;">{{ p.title }}</span>
-                <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.68rem;color:var(--accent);white-space:nowrap;margin-top:2px;flex:none;">{{ p.linkLabel }}</span>
-              </div>
-              <p style="margin:0;font-size:0.86rem;line-height:1.63;color:var(--txt2);flex:1;">{{ p.desc }}</p>
-              <ul style="display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0;">
-                <sc-for list="{{ p.tags }}" as="t" hint-placeholder-count="3">
-                  <li style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.64rem;color:var(--txt2);background:var(--skill-bg);border:0.5px solid var(--skill-border);border-radius:4px;padding:3px 8px;">{{ t }}</li>
-                </sc-for>
-              </ul>
-            </a>
-          </sc-for>
+        <div style="position:relative;">
+          <button onClick="{{ galleryPrev }}" ref="{{ setGalleryPrevBtn }}" aria-label="Previous project" style="display:none;position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:3;width:36px;height:36px;border-radius:50%;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0.5px solid var(--card-border);color:var(--txt2);cursor:pointer;font-size:1.1rem;line-height:1;align-items:center;justify-content:center;transition:border-color .2s,color .2s;" style-hover="border-color:var(--accent);color:var(--accent);">←</button>
+          <div data-tilt-zone ref="{{ setGalleryEl }}" style="display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:4px;">
+            <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+              <a href="{{ p.href }}" target="_blank" rel="noopener" data-reveal data-tilt style="display:flex;flex-direction:column;gap:14px;background:var(--card-bg);border:0.5px solid var(--card-border);border-radius:12px;padding:22px;text-decoration:none;will-change:transform;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);flex:none;width:252px;scroll-snap-align:start;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                  <span style="font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:0.88rem;color:var(--txt);line-height:1.35;">{{ p.title }}</span>
+                  <span style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.68rem;color:var(--accent);white-space:nowrap;margin-top:2px;flex:none;">{{ p.linkLabel }}</span>
+                </div>
+                <p style="margin:0;font-size:0.86rem;line-height:1.63;color:var(--txt2);flex:1;">{{ p.desc }}</p>
+                <ul style="display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0;">
+                  <sc-for list="{{ p.tags }}" as="t" hint-placeholder-count="3">
+                    <li style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.64rem;color:var(--txt2);background:var(--skill-bg);border:0.5px solid var(--skill-border);border-radius:4px;padding:3px 8px;">{{ t }}</li>
+                  </sc-for>
+                </ul>
+              </a>
+            </sc-for>
+          </div>
+          <button onClick="{{ galleryNext }}" ref="{{ setGalleryNextBtn }}" aria-label="Next project" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);z-index:3;width:36px;height:36px;border-radius:50%;background:var(--card-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0.5px solid var(--card-border);color:var(--txt2);cursor:pointer;font-size:1.1rem;line-height:1;align-items:center;justify-content:center;transition:border-color .2s,color .2s;" style-hover="border-color:var(--accent);color:var(--accent);">→</button>
         </div>
       </section>
 
@@ -504,26 +510,65 @@ class Component extends DCLogic {
   setCursorEl  = (el) => { this.cursorEl  = el; };
   setProgressEl = (el) => { this.progressEl = el; };
 
+  setGalleryEl = (el) => {
+    this.galleryEl = el;
+    if (!el) return;
+    el.addEventListener('scroll', () => this._updateGalleryBtns(), { passive: true });
+  };
+  setGalleryPrevBtn = (el) => { this.galleryPrevBtn = el; };
+  setGalleryNextBtn = (el) => {
+    this.galleryNextBtn = el;
+    if (el) setTimeout(() => this._updateGalleryBtns(), 50);
+  };
+
+  _updateGalleryBtns() {
+    const el = this.galleryEl;
+    if (!el || !this.galleryPrevBtn || !this.galleryNextBtn) return;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    this.galleryPrevBtn.style.display = atStart ? 'none' : 'flex';
+    this.galleryNextBtn.style.display = atEnd ? 'none' : 'flex';
+  }
+
+  galleryPrev = () => {
+    if (!this.galleryEl) return;
+    const card = this.galleryEl.querySelector('[data-tilt]');
+    const step = card ? card.offsetWidth + 14 : 266;
+    this.galleryEl.scrollBy({ left: -step, behavior: 'smooth' });
+  };
+
+  galleryNext = () => {
+    if (!this.galleryEl) return;
+    const card = this.galleryEl.querySelector('[data-tilt]');
+    const step = card ? card.offsetWidth + 14 : 266;
+    this.galleryEl.scrollBy({ left: step, behavior: 'smooth' });
+  };
+
   renderVals() {
-    const allSkills = ['Python', 'Java', 'C++', 'SQL', 'JavaScript', 'LaTeX',
-                       'Docker', 'Git', 'Linux', 'Bash', 'Power Automate',
-                       'Kotlin', 'Android', 'Mapbox', 'Tailscale', 'Ubuntu'];
+    const allSkills = ['Python', 'Java', 'C++', 'SQL', 'JavaScript', 'DataWeave', 'LaTeX',
+                       'Linux', 'Docker', 'MuleSoft', 'PostgreSQL', 'MariaDB', 'Redis',
+                       'Git', 'Tailscale', 'Apache2', 'VS Code', 'Anypoint Studio'];
     const roleText = '<Software Engineer />';
     return {
       setRoot: this.setRoot,
       setCursorEl: this.setCursorEl,
       setProgressEl: this.setProgressEl,
+      setGalleryEl: this.setGalleryEl,
+      setGalleryPrevBtn: this.setGalleryPrevBtn,
+      setGalleryNextBtn: this.setGalleryNextBtn,
+      galleryPrev: this.galleryPrev,
+      galleryNext: this.galleryNext,
       toggleTheme: this.toggleTheme,
       themeIcon:  this.state.theme === 'light' ? '☾' : '☀',
       themeLabel: this.state.theme === 'light' ? 'Dark' : 'Light',
       typedRole: roleText.slice(0, this.state.typedIdx),
       uptimeStr: this.state.uptimeStr,
 
-      cloudHref: 'https://cloud.dancardoz.dev',
-      email:     'mailto:hello@dancardoz.dev',
-      emailText: 'hello@dancardoz.dev',
+      cloudHref: 'https://nextcloud.home.dancardoz.de',
+      email:     'mailto:starkdan8@gmail.com',
+      emailText: 'starkdan8@gmail.com',
 
-      nowWorking: 'Extending the homelab with Vaultwarden + a live monitoring dashboard.',
+      nowWorking: 'Building an MCP server on MuleSoft to connect LLMs to live business data.',
       nowReading: 'The Linux Command Line — William Shotts',
 
       intro:  'Software engineer focused on systems, self-hosting and clean tooling. I build things that run quietly and reliably — from Android apps to a private cloud humming 24/7.',
@@ -539,27 +584,76 @@ class Component extends DCLogic {
         { idx: '06', label: 'Contact',    href: '#contact' }
       ],
       socials: [
-        { label: 'GitHub',   href: 'https://github.com' },
-        { label: 'LinkedIn', href: 'https://linkedin.com' },
-        { label: 'Email',    href: 'mailto:hello@dancardoz.dev' }
+        { label: 'GitHub',   href: 'https://github.com/HaqmuinDox' },
+        { label: 'LinkedIn', href: 'https://www.linkedin.com/in/dan-cardoz-9a2642253/' },
+        { label: 'Email',    href: 'mailto:starkdan8@gmail.com' }
       ],
       services: [
         { name: 'Nextcloud' }, { name: 'Vaultwarden' },
-        { name: 'Nginx Proxy' }, { name: 'Tailscale' }, { name: 'Monitoring' }
+        { name: 'n8n' }, { name: 'Tailscale' }, { name: 'Dawarich' }
       ],
       experience: [
-        { period: '2024 — Now',  role: 'Software Engineer',    org: '@ Independent',     desc: 'Building and running a self-hosted private cloud, automation pipelines and side projects across web and Android. Full ownership from bare metal to UI.' },
-        { period: '2022 — 2024', role: 'Software Developer',   org: '@ Placeholder Co.', desc: '[Placeholder] Backend services and internal tooling. Swap in your real role, team and the impact you had here.' },
-        { period: '2021 — 2022', role: 'Engineering Intern',   org: '@ Placeholder Labs', desc: '[Placeholder] Supported R&D on performance-analysis tooling for parallel applications. Replace with your actual internship.' }
+        {
+          period: 'Jul 2023 — Now',
+          role: 'Working Student',
+          org: '@ Wempe',
+          desc: 'Designed and deployed 5+ internal business apps with Microsoft PowerApps and Power Automate, reducing manual administrative workflows by 20%. Led the company-wide IT asset lifecycle initiative (secure data wiping, refurbishment, resale) and administered enterprise mobile infrastructure via Apple Business Manager.'
+        },
+        {
+          period: 'Jun 2022 — May 2023',
+          role: 'Part-time Salesperson',
+          org: '@ Rohlfs Bäckerei',
+          desc: 'Managed inventory and served customers in a fast-paced retail environment.'
+        }
       ],
       projects: [
-        { title: 'Recycle Heroes',            linkLabel: 'Code ↗',  href: '#',                         desc: 'Native Android app using the Mapbox SDK to locate recycling stations, with custom socket networking and JSON parsing.',     tags: ['Android', 'Kotlin', 'Mapbox'] },
-        { title: 'HPC Performance Analysis',  linkLabel: 'private', href: '#',                         desc: 'Hybrid performance analysis for parallel apps with TAU and Linux perf. Python tooling to visualise runtime bottlenecks.',   tags: ['Python', 'TAU', 'perf'] },
-        { title: 'Private Cloud',             linkLabel: 'Open ↗',  href: 'https://cloud.dancardoz.dev', desc: '24/7 Ubuntu hub managing 8 Docker containers, secured end to end via a Tailscale VPN.',                                  tags: ['Docker', 'Ubuntu', 'Tailscale'] }
+        {
+          title: 'MuleSoft MCP Server',
+          linkLabel: 'private',
+          href: '#',
+          desc: 'MCP server as a Mule application exposing structured business data to LLMs via Streamable HTTP. Mock REST API with four endpoints backed by reusable DataWeave modules as a single source of truth.',
+          tags: ['MuleSoft', 'DataWeave', 'MCP']
+        },
+        {
+          title: 'jtx Desktop',
+          linkLabel: 'Code ↗',
+          href: 'https://github.com/HaqmuinDox/jtx-desktop',
+          desc: 'Local-first desktop companion to jtx Board. Manages journals, notes and to-dos with a SQLite database and syncs bidirectionally with Nextcloud via CalDAV — works fully offline.',
+          tags: ['Electron', 'React', 'TypeScript', 'SQLite']
+        },
+        {
+          title: 'Iteratine',
+          linkLabel: 'Code ↗',
+          href: 'https://github.com/HaqmuinDox/Iteratine',
+          desc: 'Android app for building discipline through structured daily routines — plan habits, track consistency, and stay accountable.',
+          tags: ['Kotlin', 'Android']
+        },
+        {
+          title: 'Home Server & Private Cloud',
+          linkLabel: 'Open ↗',
+          href: 'private',
+          desc: '24/7 multi-service private cloud on Ubuntu — Nextcloud, Vaultwarden, n8n, Mosquitto and a full Dawarich stack (PostgreSQL/PostGIS, Redis). All services restricted to a Tailscale VPN.',
+          tags: ['Docker', 'Ubuntu', 'Tailscale']
+        },
+        {
+          title: 'HPC Performance Analysis',
+          linkLabel: 'private',
+          href: '#',
+          desc: 'Analyzed parallel application performance using TAU and Linux perf to identify runtime bottlenecks. Python tooling to visualize hotspot dominance via heatmaps.',
+          tags: ['Python', 'TAU', 'Linux perf']
+        },
+        {
+          title: 'Recycle Heroes',
+          linkLabel: 'Code ↗',
+          href: 'https://github.com/HaqmuinDox/recycleheros-v-2.0-main',
+          desc: 'Collaborative Android app for locating recycling stations using the Mapbox SDK, with a custom asynchronous socket networking layer and Gson for JSON parsing.',
+          tags: ['Java', 'Android SDK', 'Mapbox']
+        }
       ],
       skillGroups: [
-        { label: 'Languages',    items: ['Python', 'Java', 'C++', 'SQL', 'JavaScript', 'LaTeX'] },
-        { label: 'Tools & Infra', items: ['Docker', 'Git', 'Linux / Bash', 'Power Automate', 'Tailscale'] }
+        { label: 'Languages',       items: ['Python', 'Java', 'C++', 'SQL', 'JavaScript', 'DataWeave', 'LaTeX'] },
+        { label: 'Systems & Infra', items: ['Linux', 'Docker', 'MuleSoft', 'Tailscale', 'Apache2', 'PostgreSQL', 'MariaDB', 'Redis'] },
+        { label: 'Dev Tools',       items: ['Git', 'VS Code', 'Anypoint Studio'] }
       ],
       marqueeItems: [...allSkills, ...allSkills],
       posts: [
@@ -569,7 +663,12 @@ class Component extends DCLogic {
       ],
       latestPost: { date: '2026 · 03', title: 'Self-hosting Nextcloud behind Tailscale', href: '#' },
       education: [
-        { period: '20XX — 20XX', degree: 'BSc Computer Science', org: '@ Your University', desc: '[Placeholder] Focus on high-performance computing, systems and software engineering. Edit with your real programme and highlights.' }
+        {
+          period: 'Oct 2022 — Sep 2026',
+          degree: 'BSc Computer Science',
+          org: '@ University of Hamburg',
+          desc: 'Expected graduation September 2026. Relevant coursework: Data Structures, Algorithms, Database Systems, High-Performance Computing, Statistics, Modeling & Analysis of Complex Systems, Theoretical Computer Science.'
+        }
       ]
     };
   }
