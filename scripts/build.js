@@ -73,6 +73,7 @@ function buildIndexPage(posts) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Writing &amp; Notes — dan.cardoz</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script>(function(){var t;try{t=localStorage.getItem('dc-theme')}catch(e){}if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}if(t==='light')document.documentElement.setAttribute('data-theme','light')})();<\/script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -208,12 +209,12 @@ function updateHomepage(posts) {
   const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '\\r').replace(/\n/g, '\\n');
   const latest = posts[0];
 
-  const updated = html.replace(
-    /latestPost:\s*\{[\s\S]*?\},/,
+  const LATEST_RE = /latestPost:\s*\{[\s\S]*?\},/;
+  if (!LATEST_RE.test(html)) console.warn('WARNING: latestPost regex did not match — index.html not updated');
+  html = html.replace(
+    LATEST_RE,
     `latestPost: { date: '${esc(latest.date)}', title: '${esc(latest.title)}', href: '${esc(latest.href)}' },`
   );
-  if (updated === html) console.warn('WARNING: latestPost regex did not match — index.html not updated');
-  html = updated;
 
   fs.writeFileSync(indexPath, html, 'utf8');
   console.log('Updated: index.html');
