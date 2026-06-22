@@ -56,6 +56,8 @@
   @media (max-width: 640px) {
     header > div { padding-left: 16px !important; padding-right: 16px !important; }
     #menu-btn { display: flex; }
+    #theme-btn { width: 44px; height: 44px; padding: 0 !important; }
+    #theme-btn .theme-label { display: none; }
     header nav {
       display: none !important;
       position: absolute !important;
@@ -136,11 +138,13 @@
         <a href="#projects" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Projects</a>
         <a href="/writing/" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Writing</a>
         <a href="{{ cloudHref }}" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Cloud ↗</a>
-        <button onClick="{{ toggleTheme }}" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;" style-hover="border-color:var(--accent);color:var(--accent);">
-          <span>{{ themeIcon }}</span>{{ themeLabel }}
-        </button>
       </nav>
-      <button id="menu-btn" aria-label="Menu">☰</button>
+      <div style="display:flex;align-items:center;gap:8px;flex:none;">
+        <button id="theme-btn" onClick="{{ toggleTheme }}" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;" style-hover="border-color:var(--accent);color:var(--accent);">
+          <span>{{ themeIcon }}</span><span class="theme-label">{{ themeLabel }}</span>
+        </button>
+        <button id="menu-btn" aria-label="Menu">☰</button>
+      </div>
     </div>
   </header>
 
