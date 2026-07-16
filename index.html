@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dan Cardoz — Software Engineer</title>
+<meta name="description" content="Portfolio of Dan Cardoz, a software engineer focused on systems, self-hosting, and clean tooling.">
 <script src="./assets/support.js"></script>
 </head>
 <body>
@@ -148,7 +150,7 @@
         <a href="{{ cloudHref }}" onClick="{{ handleCloudClick }}" target="_blank" rel="noopener" style="font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;color:var(--txt3);text-decoration:none;transition:color .2s;" style-hover="color:var(--txt);">Cloud ↗</a>
       </nav>
       <div style="display:flex;align-items:center;gap:8px;flex:none;">
-        <button id="theme-btn" onClick="{{ toggleTheme }}" aria-label="Toggle theme" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;" style-hover="border-color:var(--accent);color:var(--accent);">
+        <button id="theme-btn" onClick="{{ toggleTheme }}" aria-label="Switch to {{ themeLabel }} mode" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:transparent;border:1px solid var(--btn-border);color:var(--txt2);font-family:'Space Mono',ui-monospace,monospace;font-size:0.7rem;padding:7px 12px;border-radius:6px;transition:border-color .2s,color .2s;white-space:nowrap;" style-hover="border-color:var(--accent);color:var(--accent);">
           <span>{{ themeIcon }}</span><span class="theme-label">{{ themeLabel }}</span>
         </button>
         <button id="menu-btn" aria-label="Menu">☰</button>
