@@ -23,7 +23,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <LayoutProvider>
       <ThemeProvider
-        theme={style.theme as "light" | "dark" | "system"}
+        // Must stay "system" (unforced) so the toggle can switch and persist.
+        // A fixed "dark"/"light" here puts the provider in forced mode and makes
+        // setTheme a no-op. Default-dark comes from the init script in layout.tsx.
+        theme="system"
         brand={style.brand as Schemes}
         accent={style.accent as Schemes}
         neutral={style.neutral as NeutralColor}
