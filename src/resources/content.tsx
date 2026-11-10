@@ -116,12 +116,13 @@ const about: About = {
         role: "Working Student",
         achievements: [
           <>
-            Designed and deployed 5+ internal business apps with Microsoft PowerApps and Power
-            Automate, reducing manual administrative workflows by 20%.
+            Worked on seven internal business apps built with Microsoft PowerApps and Power
+            Automate, automating administrative tasks that had previously been handled manually.
           </>,
           <>
-            Led the company-wide IT asset lifecycle initiative (secure data wiping, refurbishment,
-            resale) and administered enterprise mobile infrastructure via Apple Business Manager.
+            Helped develop the company's IT asset lifecycle process (secure data wiping,
+            refurbishment, resale), which I still help maintain, and administer company devices
+            through Apple Business Manager.
           </>,
         ],
         images: [],
@@ -131,7 +132,7 @@ const about: About = {
         timeframe: "Jun 2022 - May 2023",
         role: "Part-time Salesperson",
         achievements: [
-          <>Managed inventory and served customers in a fast-paced retail environment.</>,
+          <>Served customers and sold baked goods behind the counter.</>,
         ],
         images: [],
       },
