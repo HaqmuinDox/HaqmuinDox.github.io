@@ -146,7 +146,7 @@ const about: About = {
         name: "University of Hamburg",
         description: (
           <>
-            BSc Computer Science, expected September 2026. Coursework in data structures &
+            BSc Computer Science, expected March 2027. Coursework in data structures &
             algorithms, database systems, high-performance computing, statistics, and theoretical
             computer science.
           </>
