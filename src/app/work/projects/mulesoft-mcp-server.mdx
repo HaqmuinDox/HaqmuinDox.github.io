@@ -1,0 +1,25 @@
+---
+title: "MuleSoft MCP Server"
+publishedAt: "2026-05-01"
+summary: "An MCP server built as a Mule application, exposing structured business data to LLMs over Streamable HTTP, backed by reusable DataWeave modules as a single source of truth."
+images: []
+---
+
+## Overview
+
+An MCP (Model Context Protocol) server implemented as a Mule application. It exposes structured
+business data to LLMs over Streamable HTTP, so a model can query live data through a well-defined
+tool interface instead of being handed a static dump.
+
+## What it does
+
+- A mock REST API with four endpoints, backed by reusable DataWeave modules kept as a single
+  source of truth.
+- Streamable HTTP transport so an LLM client can call the server's tools as the MCP spec expects.
+- Built in Anypoint Studio, deployable as a standard Mule app.
+
+## Stack
+
+MuleSoft, DataWeave, MCP, Anypoint Studio.
+
+> This project is private.

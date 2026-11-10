@@ -1,0 +1,26 @@
+---
+title: "HPC Performance Analysis"
+publishedAt: "2025-03-01"
+summary: "Profiling a parallel C++ application with TAU and Linux perf to find runtime bottlenecks, with Python tooling to visualise hotspot dominance as heatmaps."
+images: []
+---
+
+## Overview
+
+A university HPC project: profile a parallel C++ application, identify runtime bottlenecks, and
+visualise the results. The toolchain paired TAU for function-level instrumentation with Linux
+`perf` for hardware counter data.
+
+## What it does
+
+- TAU answers *where* time goes (per-function exclusive time across MPI ranks); `perf` answers
+  *why* (cache misses, branch mispredictions, instructions per cycle).
+- Python tooling renders per-rank exclusive time as heatmaps, making load imbalance obvious at a
+  glance.
+- Loop reordering and size-aware partitioning cut runtime by roughly a third.
+
+## Stack
+
+C++, TAU, Linux perf, Python.
+
+> This project is private. I wrote up the method in the [writing section](/blog).
