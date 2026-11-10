@@ -1,7 +1,7 @@
 ---
 title: "Profiling parallel apps with TAU & perf"
 publishedAt: "2026-01-01"
-summary: "Notes from profiling a parallel C++ application using TAU for high-level traces and Linux perf for hardware counter data — how to find where time is actually spent, and how to visualise it."
+summary: "Notes from profiling a parallel C++ application using TAU for high-level traces and Linux perf for hardware counter data: how to find where time is actually spent, and how to visualise it."
 tag: "Writing"
 ---
 
@@ -13,7 +13,7 @@ For a university HPC project I had to profile a parallel C++ application, identi
 
 **TAU** instruments your application at the function level. It captures wall-clock time, CPU time, and call counts per function across all MPI ranks or OpenMP threads. The output is a profile database you browse in ParaProf or Vampir. Good for answering: *which function is dominating runtime?*
 
-**Linux `perf`** sits closer to the hardware. It reads CPU performance counters — cache misses, branch mispredictions, instructions per cycle — via the kernel's `perf_events` interface. Good for answering: *why is that function slow?*
+**Linux `perf`** sits closer to the hardware. It reads CPU performance counters (cache misses, branch mispredictions, instructions per cycle) via the kernel's `perf_events` interface. Good for answering: *why is that function slow?*
 
 The two tools complement each other. TAU tells you where time goes; `perf` tells you what the hardware is doing there.
 
@@ -45,8 +45,8 @@ paraprof tau_profiles/
 
 The flat profile sorts functions by exclusive time (time inside the function, not in its callees). Look for functions where:
 
-- Exclusive time is high — the function itself is slow
-- Inclusive time >> Exclusive time — the function calls something expensive
+- Exclusive time is high: the function itself is slow
+- Inclusive time >> Exclusive time: the function calls something expensive
 
 In my case, `compute_stencil()` appeared near the top with high exclusive time. That's where `perf` came in.
 
@@ -98,7 +98,7 @@ TAU profiles give per-function exclusive time per MPI rank. To spot load imbalan
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Load TAU profile data — simplified example
+# Load TAU profile data (simplified example)
 ranks = 8
 functions = ['compute_stencil', 'mpi_reduce', 'io_write', 'init']
 data = np.array([
@@ -123,14 +123,14 @@ plt.tight_layout()
 plt.savefig('profile_heatmap.png', dpi=150)
 ```
 
-Rank 3 standing out immediately told us there was a data partition imbalance — one rank received fewer elements and finished early, leaving the others waiting at the `MPI_Reduce` barrier.
+Rank 3 standing out immediately told us there was a data partition imbalance: one rank received fewer elements and finished early, leaving the others waiting at the `MPI_Reduce` barrier.
 
 ## What I changed
 
 After profiling:
 
-1. **Loop reordering** in `compute_stencil()` — changed from row-major to column-major iteration to match memory layout. Cache miss rate dropped from 42% to 8%.
-2. **Static load balancing** — the partitioner was dividing elements by index without accounting for non-uniform element sizes. Switching to size-aware partitioning eliminated the rank 3 anomaly.
+1. **Loop reordering** in `compute_stencil()`, changed from row-major to column-major iteration to match memory layout. Cache miss rate dropped from 42% to 8%.
+2. **Static load balancing**: the partitioner was dividing elements by index without accounting for non-uniform element sizes. Switching to size-aware partitioning eliminated the rank 3 anomaly.
 
 Runtime dropped by ~34% with both changes applied.
 
@@ -138,4 +138,4 @@ Runtime dropped by ~34% with both changes applied.
 
 - Profile before optimising. Every time I've guessed at hotspots without measuring, I've been wrong at least once.
 - TAU + perf is a good division of labour: TAU for the application-level view, `perf` for the hardware-level explanation.
-- The heatmap is a surprisingly effective presentation tool — one image showed the load imbalance more clearly than any table could.
+- The heatmap is a surprisingly effective presentation tool: one image showed the load imbalance more clearly than any table could.

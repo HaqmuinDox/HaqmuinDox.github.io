@@ -1,15 +1,15 @@
 ---
 title: "Self-hosting Nextcloud behind Tailscale"
 publishedAt: "2026-03-01"
-summary: "How I set up Nextcloud on Ubuntu behind a Tailscale VPN — Docker networking, SSL termination via Apache, and the config quirks that took me a few evenings to figure out."
+summary: "How I set up Nextcloud on Ubuntu behind a Tailscale VPN: Docker networking, automatic HTTPS via Caddy, and the config quirks that took me a few evenings to figure out."
 tag: "Notes"
 ---
 
-Running your own cloud sounds like a weekend project. In my case it turned into a proper infrastructure — Nextcloud, Vaultwarden, n8n, Dawarich, and a few more containers, all restricted to a Tailscale mesh so they're never exposed to the open internet. This post covers the Nextcloud piece specifically: getting it running reliably behind Tailscale with SSL from Let's Encrypt.
+Running your own cloud sounds like a weekend project. In my case it turned into a proper little infrastructure: Nextcloud, Vaultwarden, n8n, Dawarich and a few more containers, all restricted to a Tailscale mesh so they're never exposed to the open internet. This post covers the Nextcloud piece specifically: getting it running reliably behind Tailscale with SSL from Let's Encrypt.
 
 ## Why Tailscale instead of a public reverse proxy
 
-The tempting path is to put Nginx or Caddy on a VPS, forward traffic, and get automatic HTTPS. I tried that. The problem: your files and your password manager are accessible to anyone who can reach that IP. Even with strong passwords, you're one misconfigured firewall rule away from trouble.
+The tempting path is to put a reverse proxy on a public VPS, forward traffic, and get automatic HTTPS. I tried that. The problem: your files and your password manager are accessible to anyone who can reach that IP. Even with strong passwords, you're one misconfigured firewall rule away from trouble.
 
 Tailscale solves this by making your services reachable only to devices enrolled in your tailnet. No public IP, no open ports. The tradeoff: you can't share links with people outside your tailnet, which is fine for a personal setup.
 
@@ -64,47 +64,34 @@ volumes:
   db_data:
 ```
 
-Note: `NEXTCLOUD_TRUSTED_DOMAINS` must exactly match the hostname you'll use. Nextcloud blocks requests from unrecognised hosts — this caught me off guard the first time.
+Note: `NEXTCLOUD_TRUSTED_DOMAINS` must exactly match the hostname you'll use. Nextcloud blocks requests from unrecognised hosts, and this caught me off guard the first time.
 
-## SSL with Apache and Let's Encrypt
+## HTTPS with Caddy
 
-Nextcloud recommends Apache as the reverse proxy. Install it and enable the required modules:
+I put Caddy in front as the reverse proxy. It terminates TLS and routes to the container, and the nice part is that it manages the certificate itself: no certbot, no renewal cron to forget about. A minimal Caddyfile is just:
 
-```bash
-sudo apt install apache2
-sudo a2enmod proxy proxy_http ssl rewrite headers
+```caddyfile
+nextcloud.home.example.com {
+  reverse_proxy localhost:8080
+}
 ```
 
-Then add a virtual host:
+Caddy also sets the `X-Forwarded-*` headers on its own, so Nextcloud sees the right protocol without any extra config.
 
-```apache
-<VirtualHost *:443>
-  ServerName nextcloud.home.example.com
+### The certificate challenge
 
-  SSLEngine on
-  SSLCertificateFile    /etc/letsencrypt/live/nextcloud.home.example.com/fullchain.pem
-  SSLCertificateKeyFile /etc/letsencrypt/live/nextcloud.home.example.com/privkey.pem
+Here's the non-obvious part: the usual HTTP-01 challenge needs a publicly reachable server, and mine isn't public. The DNS-01 challenge gets around that by proving domain ownership through a TXT record instead of an HTTP endpoint. Caddy can do this directly, as long as you build it with your DNS provider's plugin and give it an API token that can write TXT records:
 
-  ProxyPass        / http://localhost:8080/
-  ProxyPassReverse / http://localhost:8080/
-
-  RequestHeader set X-Forwarded-Proto "https"
-  RequestHeader set X-Forwarded-Port  "443"
-</VirtualHost>
+```caddyfile
+nextcloud.home.example.com {
+  reverse_proxy localhost:8080
+  tls {
+    dns <your-provider> {env.DNS_API_TOKEN}
+  }
+}
 ```
 
-### Certbot with Tailscale
-
-Here's the non-obvious part: Certbot's HTTP-01 challenge requires a publicly reachable server, but yours isn't public. Use the DNS-01 challenge instead — it proves domain ownership through a TXT record, not an HTTP endpoint.
-
-```bash
-sudo apt install certbot python3-certbot-dns-<your-provider>
-sudo certbot certonly \
-  --dns-<your-provider> \
-  -d nextcloud.home.example.com
-```
-
-Replace `<your-provider>` with your DNS provider's plugin (e.g. `cloudflare`, `namecheap`). You'll need an API token with permission to add TXT records.
+Replace `<your-provider>` with your DNS provider's module (e.g. `cloudflare`, `godaddy`).
 
 ## Nextcloud config tweaks
 
@@ -116,7 +103,7 @@ After the first login, Nextcloud will likely warn about a few missing config val
 'trusted_proxies'   => ['127.0.0.1'],
 ```
 
-Without `overwriteprotocol`, Nextcloud generates `http://` URLs for WebDAV and caldav even when your clients are connecting over HTTPS — sync clients will fail silently.
+Without `overwriteprotocol`, Nextcloud generates `http://` URLs for WebDAV and caldav even when your clients are connecting over HTTPS. Sync clients then fail silently.
 
 ## Background jobs
 
@@ -132,6 +119,6 @@ The container name depends on your Compose project name. Check with `docker ps`.
 
 ## Result
 
-After all this: Nextcloud is accessible from any device in my tailnet, syncing contacts, calendars, and files. The private IP means it never appears in any internet scan. Certbot renews the certificate automatically via a systemd timer.
+After all this: Nextcloud is accessible from any device in my tailnet, syncing contacts, calendars, and files. The private IP means it never appears in any internet scan. Caddy renews the certificate on its own, well before it expires.
 
 Total monthly cost: electricity for the server and the domain name.

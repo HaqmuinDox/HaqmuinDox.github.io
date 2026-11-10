@@ -161,9 +161,9 @@ const about: About = {
         title: "Systems & self-hosting",
         description: (
           <>
-            I run a 24/7 private cloud on Ubuntu: Nextcloud, Vaultwarden, n8n and a Dawarich stack,
-            all behind a Tailscale VPN. I work with Docker and Linux daily and keep stateful
-            services healthy.
+            I run a 24/7 private cloud on a small Ubuntu box: Nextcloud, Immich, Vaultwarden and a
+            dozen other services, all behind a Tailscale VPN with Caddy terminating HTTPS
+            internally. I work with Docker and Linux daily and keep stateful services healthy.
           </>
         ),
         tags: [

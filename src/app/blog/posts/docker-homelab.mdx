@@ -1,7 +1,7 @@
 ---
 title: "My Docker homelab, container by container"
 publishedAt: "2025-11-01"
-summary: "A rundown of every container I run on my home server — what each one does, why I chose it, and the config decisions I'd make differently next time."
+summary: "A rundown of every container I run on my home server: what each one does, why I chose it, and the config decisions I'd make differently next time."
 tag: "Cheatsheet"
 ---
 
@@ -9,11 +9,11 @@ I run a private cloud on a home server. It's on 24/7, costs almost nothing to ru
 
 ## The stack at a glance
 
-- **Nextcloud** — files, contacts, calendars
-- **Vaultwarden** — password manager
-- **n8n** — workflow automation
-- **Mosquitto** — MQTT broker
-- **Dawarich** — location history
+- **Nextcloud**: files, contacts, calendars
+- **Vaultwarden**: password manager
+- **n8n**: workflow automation
+- **Mosquitto**: MQTT broker
+- **Dawarich**: location history
 
 All containers sit behind a Tailscale VPN. The host runs Ubuntu with a reverse proxy handling internal HTTPS.
 
@@ -21,7 +21,7 @@ All containers sit behind a Tailscale VPN. The host runs Ubuntu with a reverse p
 
 The centrepiece. I use it for file sync across my laptop and phone, CalDAV/CardDAV for contacts and calendars, and Nextcloud Notes as a simple scratchpad.
 
-**What I'd do differently**: I installed it with the standard Docker image and a MariaDB container. Next time I'd use the all-in-one (AIO) image — it bundles a working TURN server, onlyoffice, and automatic backups, which I've since had to set up manually.
+**What I'd do differently**: I installed it with the standard Docker image and a MariaDB container. Next time I'd use the all-in-one (AIO) image: it bundles a working TURN server, onlyoffice, and automatic backups, which I've since had to set up manually.
 
 **Key config**: Set `overwriteprotocol: https` and `overwritehost` in `config.php` to avoid WebDAV sync clients getting confused by HTTP/HTTPS mismatches behind the proxy.
 
@@ -47,7 +47,7 @@ services:
 
 ## n8n
 
-A self-hosted workflow automation tool — think Zapier, but running locally. I use it for small automations: sending myself a notification when something changes on a website I'm watching, processing MQTT messages from a temperature sensor, moving files on a schedule.
+A self-hosted workflow automation tool: think Zapier, but running locally. I use it for small automations: sending myself a notification when something changes on a website I'm watching, and moving files on a schedule.
 
 n8n has a visual editor (a DAG of nodes) and can call any HTTP endpoint, which makes it useful for connecting services that don't have direct integrations.
 
@@ -67,7 +67,7 @@ n8n has a visual editor (a DAG of nodes) and can call any HTTP endpoint, which m
 
 ## Mosquitto
 
-A lightweight MQTT broker. I have a temperature/humidity sensor that publishes to it, and n8n subscribes to process the readings.
+A lightweight MQTT broker. I ran this while experimenting with MQTT, with n8n subscribing to the messages published to it.
 
 ```bash
 # mosquitto.conf
@@ -80,7 +80,7 @@ MQTT traffic stays inside the Tailscale network. The broker is simple enough tha
 
 ## Dawarich
 
-Dawarich is a self-hosted alternative to Google Maps Timeline. It ingests location data from your phone (via Overland or the Dawarich app) and plots your movement history on a map — privately.
+Dawarich is a self-hosted alternative to Google Maps Timeline. It ingests location data from your phone (via Overland or the Dawarich app) and plots your movement history on a map, privately.
 
 The stack is heavier than the others: it requires PostgreSQL with the PostGIS extension and Redis.
 
@@ -104,7 +104,7 @@ The stack is heavier than the others: it requires PostgreSQL with the PostGIS ex
 
 Every service is bound to the internal Docker network and exposed to the reverse proxy via `localhost:PORT`. The proxy handles TLS termination and routes to the right container based on the hostname.
 
-Tailscale handles access control. All the self-hosted services are reachable only from devices in my tailnet — no ports are forwarded on the router, so nothing is directly reachable from the internet.
+Tailscale handles access control. All the self-hosted services are reachable only from devices in my tailnet. No ports are forwarded on the router, so nothing is directly reachable from the internet.
 
 ```bash
 # Check which tailscale devices can reach the server
