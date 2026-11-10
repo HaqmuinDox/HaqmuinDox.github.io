@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         width: "100%",
         height: "100%",
         padding: "6rem",
-        background: "#151515",
+        background: "#241c0e",
       }}
     >
       <div
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
           justifyContent: "center",
           gap: "4rem",
           fontStyle: "normal",
-          color: "white",
+          color: "#f0e6d2",
         }}
       >
         <span
@@ -94,7 +94,8 @@ export async function GET(request: Request) {
                 lineHeight: "2.5rem",
                 whiteSpace: "pre-wrap",
                 textWrap: "balance",
-                opacity: "0.6",
+                color: "#d9a05b",
+                opacity: "0.9",
               }}
             >
               {person.role}

@@ -72,9 +72,9 @@ const fonts: FontsConfig = {
 // default customization applied to the HTML in the main layout.tsx
 const style: StyleConfig = {
   theme: "dark", // dark | light | system
-  neutral: "slate", // sand | gray | slate | mint | rose | dusk | custom
-  brand: "blue", // blue | indigo | violet | magenta | pink | red | orange | yellow | moss | green | emerald | aqua | cyan | custom
-  accent: "cyan", // blue | indigo | violet | magenta | pink | red | orange | yellow | moss | green | emerald | aqua | cyan | custom
+  neutral: "custom", // sand | gray | slate | mint | rose | dusk | custom (see custom.css)
+  brand: "custom", // caramel #d9a05b — ramp in custom.css
+  accent: "custom", // lighter caramel #f0c48a — ramp in custom.css
   solid: "contrast", // color | contrast
   solidStyle: "flat", // flat | plastic
   border: "rounded", // rounded | playful | conservative | sharp
