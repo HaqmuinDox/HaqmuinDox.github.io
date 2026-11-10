@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import "katex/dist/katex.min.css";
 import { getPosts } from "@/utils/utils";
-import { canViewPath } from "@/utils/pageAccessServer";
 import {
   Meta,
   Schema,
@@ -49,7 +48,7 @@ export async function generateMetadata({
     title: post.metadata.title,
     description: post.metadata.summary,
     baseURL: baseURL,
-    image: post.metadata.image || `/api/og/generate?title=${post.metadata.title}`,
+    image: post.metadata.image || "/images/og.png",
     path: `${work.path}/${post.slug}`,
   });
   // Meta.generate writes a canonical only alongside language alternates.
@@ -72,11 +71,6 @@ export default async function Project({
     notFound();
   }
 
-  // Password-protected: render nothing without access (RouteGuard shows the form).
-  if (!(await canViewPath(`${work.path}/${post.slug}`))) {
-    return null;
-  }
-
   const avatars =
     post.metadata.team?.map((person) => ({
       src: person.avatar,
@@ -94,7 +88,7 @@ export default async function Project({
         datePublished={post.metadata.publishedAt}
         dateModified={post.metadata.publishedAt}
         image={
-          post.metadata.image || `/api/og/generate?title=${encodeURIComponent(post.metadata.title)}`
+          post.metadata.image || "/images/og.png"
         }
         author={{
           name: person.name,

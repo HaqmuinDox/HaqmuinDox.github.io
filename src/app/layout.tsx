@@ -6,7 +6,7 @@ import type { Viewport } from "next";
 import classNames from "classnames";
 
 import { Column, Flex, Meta } from "@once-ui-system/core";
-import { Footer, Header, RouteGuard, Providers } from "@/components";
+import { Footer, Header, Providers } from "@/components";
 import { baseURL, fonts, style, dataStyle, home, person } from "@/resources";
 
 export async function generateMetadata() {
@@ -120,7 +120,7 @@ export default async function RootLayout({
           <Header />
           <Flex as="main" zIndex={0} fillWidth padding="l" horizontal="center" flex={1}>
             <Flex horizontal="center" fillWidth minHeight="0">
-              <RouteGuard>{children}</RouteGuard>
+              {children}
             </Flex>
           </Flex>
           <Footer />

@@ -8,7 +8,7 @@ export async function generateMetadata() {
     title: blog.title,
     description: blog.description,
     baseURL: baseURL,
-    image: `/api/og/generate?title=${encodeURIComponent(blog.title)}`,
+    image: "/images/og.png",
     path: blog.path,
   });
   // Meta.generate writes a canonical only alongside language alternates.
@@ -24,7 +24,7 @@ export default function Blog() {
         title={blog.title}
         description={blog.description}
         path={blog.path}
-        image={`/api/og/generate?title=${encodeURIComponent(blog.title)}`}
+        image={"/images/og.png"}
         author={{
           name: person.name,
           url: `${baseURL}/blog`,
