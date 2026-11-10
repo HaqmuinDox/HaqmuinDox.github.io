@@ -5,7 +5,7 @@ const person: Person = {
   firstName: "Dan",
   lastName: "Cardoz",
   name: `Dan Cardoz`,
-  role: "Software Engineer",
+  role: "Software Developer",
   avatar: "/images/avatar.jpg", // placeholder "DC" monogram — replace this file with your photo
   email: "contact@dancardoz.de",
   location: "Europe/Berlin", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
@@ -60,8 +60,8 @@ const home: Home = {
   image: "/images/og/home.jpg",
   label: "Home",
   title: `${person.name}'s Portfolio`,
-  description: `Portfolio of ${person.name}, a software engineer focused on systems, self-hosting and clean tooling.`,
-  headline: <>Close to the metal</>,
+  description: `${person.name}, a software developer based in Hamburg. Work, writing, and the things I make.`,
+  headline: <>Work, writing, and the things I make</>,
   featured: {
     display: true,
     title: (
@@ -75,12 +75,7 @@ const home: Home = {
     ),
     href: "/work/jtx-desktop",
   },
-  subline: (
-    <>
-      I'm Dan, a software engineer. I build and self-host my own systems, from Android apps to a
-      private cloud that stays up 24/7.
-    </>
-  ),
+  subline: <>I'm Dan, a software developer based in Hamburg.</>,
 };
 
 const about: About = {
@@ -104,7 +99,7 @@ const about: About = {
     title: "Introduction",
     description: (
       <>
-        I'm a software engineer who likes working low in the stack. I profile parallel workloads,
+        I'm a software developer who likes working low in the stack. I profile parallel workloads,
         build native Android apps, and keep Docker containers running. I also host my own
         infrastructure: a private cloud behind a VPN that I run end to end. You understand a system
         best once you are the one keeping it online.
