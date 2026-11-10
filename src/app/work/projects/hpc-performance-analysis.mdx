@@ -5,22 +5,17 @@ summary: "Profiling a parallel C++ application with TAU and Linux perf to find r
 images: []
 ---
 
-## Overview
+A university project in high-performance computing. The task was to take a parallel C++
+application, work out where it spent its time, and make it faster.
 
-A university HPC project: profile a parallel C++ application, identify runtime bottlenecks, and
-visualise the results. The toolchain paired TAU for function-level instrumentation with Linux
-`perf` for hardware counter data.
+I profiled it two ways that answer different questions. TAU instruments the code at the function
+level and shows where the time goes: per-function exclusive time across the MPI ranks. Linux
+`perf` reads the hardware counters and shows why, in terms of cache misses, branch mispredictions
+and instructions per cycle. On top of that I wrote a bit of Python to render each rank's exclusive
+time as a heatmap, which makes load imbalance obvious at a glance rather than buried in a table of
+numbers.
 
-## What it does
-
-- TAU answers *where* time goes (per-function exclusive time across MPI ranks); `perf` answers
-  *why* (cache misses, branch mispredictions, instructions per cycle).
-- Python tooling renders per-rank exclusive time as heatmaps, making load imbalance obvious at a
-  glance.
-- Loop reordering and size-aware partitioning cut runtime by roughly a third.
-
-## Stack
-
-C++, TAU, Linux perf, Python.
+Most of what came out of it was about memory access patterns. Reordering a couple of loops and
+partitioning the work by size cut the runtime by about a third.
 
 > This project is private. I wrote up the method in the [writing section](/blog).

@@ -1,25 +1,26 @@
 ---
-title: "Home Server & Private Cloud"
+title: "Home Server"
 publishedAt: "2025-06-01"
-summary: "A 24/7 multi-service private cloud on Ubuntu running Nextcloud, Vaultwarden, n8n, Mosquitto and a full Dawarich stack, all restricted to a Tailscale VPN."
+summary: "A 24/7 private cloud on a small Fujitsu box: Nextcloud, Immich, Vaultwarden and a dozen other services, all reachable only over a Tailscale VPN."
 images: []
 ---
 
-## Overview
+I run a home server so my files, photos and passwords live on hardware I own instead of in
+someone else's cloud. It is a small Fujitsu ESPRIMO (a quad-core i5 with 16 GB of RAM) running
+Ubuntu, and over time it has grown into a dozen-plus containers.
 
-A 24/7 multi-service private cloud running on Ubuntu. It hosts Nextcloud, Vaultwarden, n8n,
-Mosquitto and a full Dawarich stack (PostgreSQL/PostGIS, Redis). It handles files, passwords,
-automation and location history, all on my own metal.
+What runs on it:
 
-## What it does
+- **Nextcloud** for files, contacts and calendars
+- **Immich** for photos, with the machine's integrated GPU handling the transcoding
+- **Vaultwarden** as a password manager
+- **Dawarich** for private location history
+- **Navidrome** for music, plus a small local LLM stack (Ollama and Open WebUI)
+- **Pi-hole** with Unbound as the DNS resolver for the whole network
+- **n8n** for small automations
 
-- Every service runs in Docker and is reachable only from devices in my Tailscale tailnet. No
-  ports are forwarded and nothing is exposed to the open internet.
-- A reverse proxy handles internal HTTPS; certificates are issued via DNS-01 for private hosts.
-- Nightly backups follow a 3-2-1 strategy for the databases.
-
-## Stack
-
-Docker, Ubuntu, Tailscale, PostgreSQL, Redis, Apache.
-
-> This project is private.
+Most of it is Docker Compose, with Watchtower keeping the images current. The part I find most
+interesting is the networking. Nothing is exposed to the open internet: every service is reachable
+only from devices on my Tailscale tailnet, and Caddy terminates HTTPS internally with certificates
+I renew over DNS. A nightly job mirrors the important data to a separate disk. I wrote the whole
+setup up, container by container, in [the blog](/blog/docker-homelab).

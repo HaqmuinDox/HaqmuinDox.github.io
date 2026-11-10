@@ -5,21 +5,14 @@ summary: "An MCP server built as a Mule application, exposing structured busines
 images: []
 ---
 
-## Overview
+An MCP (Model Context Protocol) server, built as a Mule application. The idea was to let an LLM
+query live business data through a proper tool interface instead of being handed a static dump
+that goes stale the moment it is generated.
 
-An MCP (Model Context Protocol) server implemented as a Mule application. It exposes structured
-business data to LLMs over Streamable HTTP, so a model can query live data through a well-defined
-tool interface instead of being handed a static dump.
-
-## What it does
-
-- A mock REST API with four endpoints, backed by reusable DataWeave modules kept as a single
-  source of truth.
-- Streamable HTTP transport so an LLM client can call the server's tools as the MCP spec expects.
-- Built in Anypoint Studio, deployable as a standard Mule app.
-
-## Stack
-
-MuleSoft, DataWeave, MCP, Anypoint Studio.
+It exposes a small mock REST API, four endpoints, over Streamable HTTP, the transport the MCP spec
+expects, so a model client can discover and call the tools directly. Behind that sits a set of
+reusable DataWeave modules that I kept as the single source of truth for how the data is shaped,
+so the same transformation logic serves every endpoint instead of being copied from one to the
+next. I built it in Anypoint Studio, and it deploys as an ordinary Mule app.
 
 > This project is private.

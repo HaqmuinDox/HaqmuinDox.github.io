@@ -6,18 +6,10 @@ link: "https://github.com/HaqmuinDox/jtx-desktop"
 images: []
 ---
 
-## Overview
+jtx Board is a solid Android app for journals, notes and to-dos, and it syncs over CalDAV, but it
+only runs on a phone. jtx Desktop is the companion I wanted on a laptop.
 
-jtx Desktop is a local-first desktop companion to jtx Board. It manages journals, notes and
-to-dos in a local SQLite database and syncs both ways with Nextcloud over CalDAV, so the app works
-fully offline and reconciles once a connection is available.
-
-## What it does
-
-- Stores everything locally in SQLite, so the app is fast and usable with no network.
-- Two-way CalDAV sync against a self-hosted Nextcloud, reconciling local and remote changes.
-- A clean Electron + React + TypeScript interface for capturing journals, notes and tasks.
-
-## Stack
-
-Electron, React, TypeScript, SQLite, CalDAV.
+It is an Electron app that keeps everything in a local SQLite database, so it opens instantly and
+works with no connection at all. Once it is online it syncs both ways with a self-hosted Nextcloud
+over CalDAV, reconciling whatever changed on either side. The interface is React and TypeScript,
+kept deliberately plain: a list, an editor, and not much else.
