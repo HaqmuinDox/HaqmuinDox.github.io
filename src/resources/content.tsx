@@ -61,7 +61,7 @@ const home: Home = {
   label: "Home",
   title: `${person.name}'s Portfolio`,
   description: `Portfolio of ${person.name}, a software engineer focused on systems, self-hosting and clean tooling.`,
-  headline: <>Systems, self-hosting, and software I actually own</>,
+  headline: <>Close to the metal</>,
   featured: {
     display: true,
     title: (
@@ -77,9 +77,8 @@ const home: Home = {
   },
   subline: (
     <>
-      I'm Dan, a software engineer focused on systems, self-hosting and clean tooling. I build
-      things that run quietly and reliably <br /> — from Android apps to a private cloud humming
-      24/7.
+      I'm Dan, a software engineer. I build and self-host my own systems, from Android apps to a
+      private cloud that stays up 24/7.
     </>
   ),
 };
@@ -105,12 +104,10 @@ const about: About = {
     title: "Introduction",
     description: (
       <>
-        I'm a software engineer who likes getting close to the metal. Whether it's profiling
-        parallel workloads, wiring up native Android apps, or keeping a fleet of Docker containers
-        healthy, I care about software that's fast, understandable and genuinely owned. Outside of
-        shipping features I run my own infrastructure end to end — a self-hosted private cloud
-        behind a VPN — because the best way to understand a system is to be the one keeping it alive
-        at 3am.
+        I'm a software engineer who likes working low in the stack. I profile parallel workloads,
+        build native Android apps, and keep Docker containers running. I also host my own
+        infrastructure: a private cloud behind a VPN that I run end to end. You understand a system
+        best once you are the one keeping it online.
       </>
     ),
   },
@@ -169,8 +166,8 @@ const about: About = {
         title: "Systems & self-hosting",
         description: (
           <>
-            Running a 24/7 private cloud on Ubuntu — Nextcloud, Vaultwarden, n8n and a full Dawarich
-            stack, all behind a Tailscale VPN. Comfortable with Docker, Linux and keeping stateful
+            I run a 24/7 private cloud on Ubuntu: Nextcloud, Vaultwarden, n8n and a Dawarich stack,
+            all behind a Tailscale VPN. I work with Docker and Linux daily and keep stateful
             services healthy.
           </>
         ),
