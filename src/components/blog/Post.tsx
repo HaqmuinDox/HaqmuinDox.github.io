@@ -51,7 +51,7 @@ export default function Post({ post, thumbnail, direction }: PostProps) {
         >
           <Row gap="24" vertical="center">
             <Row vertical="center" gap="16">
-              {person.avatar ? <Avatar src={person.avatar} size="s" aria-label={person.name} /> : null}
+              <Avatar src={person.avatar} size="s" aria-label={person.name} />
               <Text variant="label-default-s">{person.name}</Text>
             </Row>
             <Text variant="body-default-xs" onBackground="neutral-weak">

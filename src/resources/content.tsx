@@ -6,7 +6,7 @@ const person: Person = {
   lastName: "Cardoz",
   name: `Dan Cardoz`,
   role: "Software Engineer",
-  avatar: "", // drop a photo at public/images/avatar.jpg and set this to "/images/avatar.jpg"
+  avatar: "/images/avatar.jpg", // placeholder "DC" monogram — replace this file with your photo
   email: "contact@dancardoz.de",
   location: "Europe/Berlin", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
   languages: ["English", "German"], // optional: Leave the array empty if you don't want to display languages
@@ -94,7 +94,7 @@ const about: About = {
     subItems: false,
   },
   avatar: {
-    display: false, // no photo yet — drop one at public/images/avatar.jpg and flip this to true
+    display: true,
   },
   calendar: {
     display: false,
