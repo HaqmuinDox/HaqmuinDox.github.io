@@ -57,7 +57,60 @@
    --text; espresso (#2a2114) is its light-mode counterpart. */
 :root[data-theme="dark"] {
   --neutral-on-background-strong: #f0e6d2;
+  /* Deepen the ground. Without once-ui's radial mask darkening the edges, the
+     espresso neutral-background-weak read too bright under the mottle; drop it
+     to a near-black warm ink so dark mode feels dark again. */
+  --page-background: oklch(0.09 0.016 82);
 }
 :root[data-theme="light"] {
   --neutral-on-background-strong: #2a2114;
+  /* Warm the page ground from near-white to aged cream so light mode reads as
+     the paper of a calligraphy scroll, not a white page. Same warm hue (84) as
+     the neutral ramp, just lighter-with-chroma; the texture layers ride on it. */
+  --page-background: oklch(0.942 0.028 84.46);
+}
+
+/* Aged-paper tooth. The scheme hue is right (inverted shan-shui-inf), but a
+   flat fill reads as a swatch; real scroll-canvas has fibre. A procedural
+   feTurbulence grain, tiled and composited over the whole page, gives that
+   tooth with no asset or dependency. Faint so page contrast is unaffected;
+   multiply darkens the fibre into the cream, screen lifts it on the dark ink.
+   One knob: --paper-opacity. Pointer-events off so it never blocks clicks. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: var(--paper-opacity, 0.12);
+  mix-blend-mode: multiply;
+  background-size: 220px 220px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] body::after {
+  mix-blend-mode: screen;
+  --paper-opacity: 0.14;
+}
+:root[data-theme="light"] body::after { --paper-opacity: 0.22; }
+:root[data-theme="light"] body::before { --mottle-opacity: 0.9; }
+/* Aged mottling. Large, soft, uneven blotches (foxing, water-staining) so the
+   grain field stops reading as one uniform tone. Very-low-frequency turbulence,
+   compressed around mid-grey and desaturated, composited soft-light so it gently
+   lightens and darkens patches on either ground from a single declaration.
+   One knob: --mottle-opacity. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--mottle-opacity, 0.7);
+  mix-blend-mode: soft-light;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='0.6' intercept='0.2'/%3E%3CfeFuncG type='linear' slope='0.6' intercept='0.2'/%3E%3CfeFuncB type='linear' slope='0.6' intercept='0.2'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+@media print {
+  body::before,
+  body::after { display: none; }
 }

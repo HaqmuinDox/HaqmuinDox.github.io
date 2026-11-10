@@ -1,7 +1,6 @@
 import {
   DataStyleConfig,
   DisplayConfig,
-  EffectsConfig,
   FontsConfig,
   NewsletterFormConfig,
   ProtectedRoutesConfig,
@@ -97,47 +96,6 @@ const dataStyle: DataStyleConfig = {
   },
 };
 
-const effects: EffectsConfig = {
-  mask: {
-    cursor: false,
-    x: 50,
-    y: 0,
-    radius: 100,
-  },
-  gradient: {
-    display: false,
-    opacity: 100,
-    x: 50,
-    y: 60,
-    width: 100,
-    height: 50,
-    tilt: 0,
-    colorStart: "accent-background-strong",
-    colorEnd: "page-background",
-  },
-  dots: {
-    display: true,
-    opacity: 40,
-    size: "2",
-    color: "brand-background-strong",
-  },
-  grid: {
-    display: false,
-    opacity: 100,
-    color: "neutral-alpha-medium",
-    width: "0.25rem",
-    height: "0.25rem",
-  },
-  lines: {
-    display: false,
-    opacity: 100,
-    color: "neutral-alpha-weak",
-    size: "16",
-    thickness: 1,
-    angle: 45,
-  },
-};
-
 // Newsletter signups go straight into your Aveiro audience (https://www.aveiro.app),
 // where you can write and send the newsletter too. In Aveiro, open Audience → Embed,
 // create a form, add this site's domain to its allowed sites and paste the form's public ID here.
@@ -228,6 +186,5 @@ export {
   schema,
   sameAs,
   socialSharing,
-  effects,
   dataStyle,
 };
