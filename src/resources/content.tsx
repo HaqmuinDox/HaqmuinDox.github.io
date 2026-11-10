@@ -37,7 +37,7 @@ const social: Social = [
   },
   {
     name: "X",
-    icon: "twitter",
+    icon: "x",
     link: "https://x.com/dan_cardoz",
     essential: true,
   },

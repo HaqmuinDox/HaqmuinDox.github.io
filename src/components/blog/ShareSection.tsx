@@ -19,7 +19,7 @@ interface SocialPlatform {
 const socialPlatforms: Record<string, SocialPlatform> = {
   x: {
     name: "x",
-    icon: "twitter",
+    icon: "x",
     label: "X",
     generateUrl: (title, url) =>
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
